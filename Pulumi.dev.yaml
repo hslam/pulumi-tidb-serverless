@@ -3,8 +3,11 @@ config:
   pulumi-shared-storage-tidb:region: us-east-1
   pulumi-shared-storage-tidb:env: dev
   pulumi-shared-storage-tidb:cidr-block: 10.0.0.0/16
-  pulumi-shared-storage-tidb:k8s-version: "1.24"
   pulumi-shared-storage-tidb:availability-zones: "3"
+  pulumi-shared-storage-tidb:k8s-version: "1.24"
+  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.24.2"
+  pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: 0.5
+  pulumi-shared-storage-tidb:cluster-autoscaler-enabled: false
   pulumi-shared-storage-tidb:ami-id: ami-08c95f33fc51670df
   pulumi-shared-storage-tidb:default-nodegroup:
     category: "control-plane"

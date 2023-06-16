@@ -7,6 +7,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as iam from "./iam";
 import * as asg from "./asg";
+import * as autoscaler from "./autoscaler";
 
 const config = new pulumi.Config();
 
@@ -73,3 +74,7 @@ const tidbASG = createManagedNodeGroup("tidb");
 
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
+
+if (config.requireBoolean("cluster-autoscaler-enabled")) {
+    autoscaler.InstallAutoScaler(cluster, env);
+}
