@@ -7,6 +7,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as iam from "./iam";
 import * as asg from "./asg";
+import * as csi from "./csi";
 import * as autoscaler from "./autoscaler";
 
 const config = new pulumi.Config();
@@ -79,6 +80,10 @@ if (asg.existNodeGroupOptions("tikv")) {
 if (asg.existNodeGroupOptions("tidb")) {
     const tidbASG = createManagedNodeGroup("tidb");
 }
+
+const scDriver = csi.InstallCSIDriver(cluster, env, prefix);
+const sc = csi.InstallEBSSC(cluster, scDriver);
+const scName = sc.metadata.name;
 
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;

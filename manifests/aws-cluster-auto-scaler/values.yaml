@@ -1,0 +1,4 @@
+clusterName: ""
+downThreshold: 0.5
+caVersion: ""
+caImage: k8s.gcr.io/autoscaling/cluster-autoscaler
