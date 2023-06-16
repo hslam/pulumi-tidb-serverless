@@ -6,11 +6,13 @@ import * as eks from "@pulumi/eks";
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as iam from "./iam";
+import * as asg from "./asg";
 
 const config = new pulumi.Config();
 
 export const env = config.require("env");
 export const region = config.require("region");
+export const availableZone = config.get("available-zone") || `${region}a`;
 export const prefix = `${env}-${region}-tidb`;
 export const cidrBlock = config.require("cidr-block");
 const numberOfAvailabilityZones = config.getNumber("availability-zones") || 3;
@@ -48,31 +50,17 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
     instanceRoles: [managedASGRole],
 });
 
-// Create an AWS node group using a cluster as input.
-const nodeGroup = cluster.createNodeGroup("${prefix}-node-group", {
-    instanceType: "t2.medium",
-    maxSize: 2,
-    desiredCapacity: 2,
-    minSize: 1,
-    labels: {"ondemand": "true"},
+const defaultASG = asg.createManagedNodeGroup(`${prefix}-${availableZone}-serverless-default`, {
+    options: asg.loadNodeGroupOptions("default"),
+    env: env,
+    role: managedASGRole,
     instanceProfile: instanceProfile,
-});
-
-// Create an AWS managed node group using a cluster as input.
-const managedNodeGroup = eks.createManagedNodeGroup("${prefix}-managed-node-group", {
     cluster: cluster,
+    prefix: prefix,
+    availabilityZone: availableZone,
     subnetIds: allVpcSubnets,
-    capacityType: "ON_DEMAND",
-    instanceTypes: ["t2.medium"],
-    scalingConfig: {
-        maxSize: 2,
-        desiredSize: 2,
-        minSize: 1,
-    },
-    nodeRoleArn: managedASGRole.arn,
-    labels: {"ondemand": "true"},
-    tags: {"org": "pulumi"},
-}, cluster);
+    maxUnavailable: 1,
+});
 
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
