@@ -46,7 +46,9 @@ config:
   pulumi-shared-storage-tidb:serverless-pre-alloc-keyspaces: ["tenant-1", "tenant-2"]
   pulumi-shared-storage-tidb:serverless-pd-replicas: 3
   pulumi-shared-storage-tidb:serverless-pd-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-pd-storage-size: "10Gi"
   pulumi-shared-storage-tidb:serverless-tikv-replicas: 3
   pulumi-shared-storage-tidb:serverless-tikv-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-tikv-storage-size: "10Gi"
   pulumi-shared-storage-tidb:serverless-tidb-version: v7.1.0
   pulumi-shared-storage-tidb:serverless-tidb-replicas: 1

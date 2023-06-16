@@ -11,8 +11,10 @@ const tidbOperatorTag = config.require("tidb-operator-tag");
 const preAllocKeyspaces = config.getObject<string[]>("serverless-pre-alloc-keyspaces") || [];
 const pdReplicas = config.getNumber("serverless-pd-replicass") || 1;
 const pdVersion = config.get<string>("serverless-pd-version") || "v7.1.0";
+const pdStorageSize = config.get<string>("serverless-pd-storage-size") || "10Gi";
 const tikvReplicas = config.getNumber("serverless-tikv-replicas") || 1;
 const tikvVersion = config.get<string>("serverless-tikv-version") || "v7.1.0";
+const tikvStorageSize = config.get<string>("serverless-tikv-storage-size") || "10Gi";
 const tidbReplicas = config.getNumber("serverless-tidb-replicas") || 1;
 const tidbVersion = config.get<string>("serverless-tidb-version") || "v7.1.0";
 
@@ -122,6 +124,8 @@ function CreateTC(
                 withTiDBClusterImage("pd", "pingcap/pd", pdVersion),
                 withTiDBClusterImage("tikv", "pingcap/tikv", tikvVersion),
                 withTiDBClusterImage("tidb", "pingcap/tidb", tidbVersion),
+                withTiDBClusterStorageSize("pd", pdStorageSize),
+                withTiDBClusterStorageSize("tikv", tikvStorageSize),
                 withTiDBClusterReplicas("pd", pdReplicas),
                 withTiDBClusterReplicas("tidb", tidbReplicas),
                 withTiDBClusterReplicas("tikv", tikvReplicas),
@@ -174,6 +178,17 @@ function withTiDBClusterImage(name: string, baseImage: string, imageVersion: str
         } else if (name === "tidb") {
             obj.spec.tidb.baseImage = baseImage;
             obj.spec.tidb.version = imageVersion;
+        }
+    };
+}
+
+function withTiDBClusterStorageSize(name: string, storageSize: string) {
+    return (obj: any, _opts: pulumi.CustomResourceOptions) => {
+        assertGVK(obj, "pingcap.com/v1alpha1", "TidbCluster");
+        if (name === "pd") {
+            obj.spec.pd.requests.storage = storageSize;
+        } else if (name === "tikv") {
+            obj.spec.tikv.requests.storage = storageSize;
         }
     };
 }
