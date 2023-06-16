@@ -54,9 +54,25 @@ const nodeGroup = cluster.createNodeGroup("${prefix}-node-group", {
     maxSize: 2,
     desiredCapacity: 2,
     minSize: 1,
-    labels: { "ondemand": "true" },
+    labels: {"ondemand": "true"},
     instanceProfile: instanceProfile,
 });
+
+// Create an AWS managed node group using a cluster as input.
+const managedNodeGroup = eks.createManagedNodeGroup("${prefix}-managed-node-group", {
+    cluster: cluster,
+    subnetIds: allVpcSubnets,
+    capacityType: "ON_DEMAND",
+    instanceTypes: ["t2.medium"],
+    scalingConfig: {
+        maxSize: 2,
+        desiredSize: 2,
+        minSize: 1,
+    },
+    nodeRoleArn: managedASGRole.arn,
+    labels: {"ondemand": "true"},
+    tags: {"org": "pulumi"},
+}, cluster);
 
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
