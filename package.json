@@ -1,0 +1,13 @@
+{
+    "name": "pulumi-shared-storage-tidb",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^16"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^5.0.0",
+        "@pulumi/awsx": "^0.40.0",
+        "@pulumi/eks": "^0.40.0",
+        "@pulumi/pulumi": "^3.32.1"
+    }
+}
