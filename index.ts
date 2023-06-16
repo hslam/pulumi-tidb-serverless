@@ -67,10 +67,18 @@ export function createManagedNodeGroup(
     });
 }
 
-const defaultASG = createManagedNodeGroup("default");
-const pdASG = createManagedNodeGroup("pd");
-const tikvASG = createManagedNodeGroup("tikv");
-const tidbASG = createManagedNodeGroup("tidb");
+if (asg.existNodeGroupOptions("default")) {
+    const defaultASG = createManagedNodeGroup("default");
+}
+if (asg.existNodeGroupOptions("pd")) {
+    const pdASG = createManagedNodeGroup("pd");
+}
+if (asg.existNodeGroupOptions("tikv")) {
+    const tikvASG = createManagedNodeGroup("tikv");
+}
+if (asg.existNodeGroupOptions("tidb")) {
+    const tidbASG = createManagedNodeGroup("tidb");
+}
 
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;

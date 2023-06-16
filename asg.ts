@@ -30,6 +30,11 @@ const defaultNodeGroupOptions: NodeGroupOptions = {
     exclusive: true,
 };
 
+export function existNodeGroupOptions(name: string): boolean {
+    const options = config.getObject<NodeGroupOptions>(`${name}-nodegroup`);
+    return options != null;
+}
+
 export function loadNodeGroupOptions(name: string): NodeGroupOptions {
     const options = config.requireObject<NodeGroupOptions>(`${name}-nodegroup`);
     return {
