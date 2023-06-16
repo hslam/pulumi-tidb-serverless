@@ -14,3 +14,24 @@ config:
     min: 2
     max: 10
     exclusive: false
+  pulumi-shared-storage-tidb:pd-nodegroup:
+    category: "control-plane"
+    component: "pd"
+    instanceType: t2.medium
+    capacityType: "ON_DEMAND"
+    min: 1
+    max: 5
+  pulumi-shared-storage-tidb:tikv-nodegroup:
+    category: "storage"
+    component: "tikv"
+    instanceType: t2.medium
+    capacityType: "ON_DEMAND"
+    min: 1
+    max: 9
+  pulumi-shared-storage-tidb:tidb-nodegroup:
+    category: "compute"
+    component: "tidb"
+    instanceType: t2.medium
+    capacityType: "SPOT"
+    min: 1
+    max: 10

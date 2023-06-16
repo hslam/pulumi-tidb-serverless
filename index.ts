@@ -50,17 +50,26 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
     instanceRoles: [managedASGRole],
 });
 
-const defaultASG = asg.createManagedNodeGroup(`${prefix}-${availableZone}-serverless-default`, {
-    options: asg.loadNodeGroupOptions("default"),
-    env: env,
-    role: managedASGRole,
-    instanceProfile: instanceProfile,
-    cluster: cluster,
-    prefix: prefix,
-    availabilityZone: availableZone,
-    subnetIds: allVpcSubnets,
-    maxUnavailable: 1,
-});
+export function createManagedNodeGroup(
+    name: string,
+): eks.ManagedNodeGroup {
+    return asg.createManagedNodeGroup(`${prefix}-${availableZone}-serverless-${name}`, {
+        options: asg.loadNodeGroupOptions(name),
+        env: env,
+        role: managedASGRole,
+        instanceProfile: instanceProfile,
+        cluster: cluster,
+        prefix: prefix,
+        availabilityZone: availableZone,
+        subnetIds: allVpcSubnets,
+        maxUnavailable: 1,
+    });
+}
+
+const defaultASG = createManagedNodeGroup("default");
+const pdASG = createManagedNodeGroup("pd");
+const tikvASG = createManagedNodeGroup("tikv");
+const tidbASG = createManagedNodeGroup("tidb");
 
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
