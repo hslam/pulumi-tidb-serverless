@@ -1,0 +1,106 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TidbCluster
+metadata:
+  name: basic
+  namespace: "tidb-cluster"
+spec:
+  cluster:
+    name: ""
+  version: v7.1.0
+  timezone: UTC
+  pvReclaimPolicy: Retain
+  enablePVReclaim: true
+  enableDynamicConfiguration: true
+  configUpdateStrategy: RollingUpdate
+  discovery: {}
+  helper:
+    image: alpine:3.16.0
+  pd:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/component: pd
+            topologyKey: kubernetes.io/hostname
+    nodeSelector:
+      serverless.tidbcloud.com/node: pd
+    tolerations:
+      - effect: NoSchedule
+        key: serverless.tidbcloud.com/node
+        operator: Equal
+        value: pd
+    baseImage: pingcap/pd
+    version: v7.1.0
+    maxFailoverCount: 3
+    replicas: 0
+    requests:
+      storage: "10Gi"
+    storageClassName: ebs-sc
+    config: |
+      [dashboard]
+      enable-telemetry = false
+      internal-proxy = true
+      [replication]
+      enable-placement-rules = true
+      location-labels = ["topology.kubernetes.io/region", "topology.kubernetes.io/zone", "kubernetes.io/hostname"]
+      max-replicas = 3
+      [keyspace]
+      pre-alloc = {{PreAllocKeyspaces}}
+  tikv:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/component: tikv
+            topologyKey: kubernetes.io/hostname
+    nodeSelector:
+      serverless.tidbcloud.com/node: tikv
+    tolerations:
+      - effect: NoSchedule
+        key: serverless.tidbcloud.com/node
+        operator: Equal
+        value: tikv
+    baseImage: pingcap/tikv
+    version: v7.1.0
+    maxFailoverCount: 3
+    evictLeaderTimeout: 1m
+    replicas: 0
+    requests:
+      storage: "10Gi"
+    storageClassName: ebs-sc
+    config: |
+      [storage]
+      reserve-space = "0GB"
+      enable-ttl = true
+      api-version = 2
+  tidb:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/component: tidb
+            topologyKey: kubernetes.io/hostname
+    nodeSelector:
+      serverless.tidbcloud.com/node: tidb
+    tolerations:
+      - effect: NoSchedule
+        key: serverless.tidbcloud.com/node
+        operator: Equal
+        value: tidb
+    baseImage: pingcap/tidb
+    version: v7.1.0
+    maxFailoverCount: 3
+    replicas: 0
+    requests:
+      cpu: 1000m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 1Gi
+    service:
+      type: ClusterIP
+    config: |
+      keyspace-name = {{KeyspaceName}}

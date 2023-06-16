@@ -2,12 +2,10 @@ config:
   aws:region: us-east-1
   pulumi-shared-storage-tidb:region: us-east-1
   pulumi-shared-storage-tidb:env: dev
+  pulumi-shared-storage-tidb:suffix: f01
   pulumi-shared-storage-tidb:cidr-block: 10.0.0.0/16
   pulumi-shared-storage-tidb:availability-zones: "3"
   pulumi-shared-storage-tidb:k8s-version: "1.24"
-  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.24.2"
-  pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: 0.5
-  pulumi-shared-storage-tidb:cluster-autoscaler-enabled: false
   pulumi-shared-storage-tidb:ami-id: ami-08c95f33fc51670df
   pulumi-shared-storage-tidb:default-nodegroup:
     category: "control-plane"
@@ -22,19 +20,33 @@ config:
     component: "pd"
     instanceType: t2.medium
     capacityType: "ON_DEMAND"
-    min: 1
+    min: 3
     max: 5
   pulumi-shared-storage-tidb:tikv-nodegroup:
     category: "storage"
     component: "tikv"
     instanceType: t2.medium
     capacityType: "ON_DEMAND"
-    min: 1
+    min: 3
     max: 9
   pulumi-shared-storage-tidb:tidb-nodegroup:
     category: "compute"
     component: "tidb"
     instanceType: t2.medium
     capacityType: "SPOT"
-    min: 1
+    min: 3
     max: 10
+  pulumi-shared-storage-tidb:cluster-autoscaler-enabled: false
+  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.24.2"
+  pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: 0.5
+  pulumi-shared-storage-tidb:tidb-operator-enabled: false
+  pulumi-shared-storage-tidb:tidb-operator-tag: v1.4.4
+  pulumi-shared-storage-tidb:serverless-enabled: false
+  pulumi-shared-storage-tidb:serverless-namespace: tidb-serverless
+  pulumi-shared-storage-tidb:serverless-pre-alloc-keyspaces: ["tenant-1", "tenant-2"]
+  pulumi-shared-storage-tidb:serverless-pd-replicas: 3
+  pulumi-shared-storage-tidb:serverless-pd-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-tikv-replicas: 3
+  pulumi-shared-storage-tidb:serverless-tikv-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-tidb-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-tidb-replicas: 1

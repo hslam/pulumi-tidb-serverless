@@ -9,12 +9,14 @@ import * as iam from "./iam";
 import * as asg from "./asg";
 import * as csi from "./csi";
 import * as autoscaler from "./autoscaler";
+import * as serverless from "./serverless";
 
 const config = new pulumi.Config();
 
 export const env = config.require("env");
 export const region = config.require("region");
-export const prefix = `${env}-${region}-tidb`;
+export const suffix = config.require("suffix");
+export const prefix = `${env}-${region}-${suffix}`;
 export const cidrBlock = config.require("cidr-block");
 const numberOfAvailabilityZones = config.getNumber("availability-zones") || 3;
 const k8sVersion = config.require("k8s-version");
@@ -51,7 +53,6 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
     instanceRoles: [managedASGRole],
 });
 
-
 // Create a managed node group with component name.
 export function createManagedNodeGroup(
     name: string,
@@ -82,11 +83,17 @@ if (asg.existNodeGroupOptions("tidb")) {
 
 const scDriver = csi.InstallCSIDriver(cluster, env, prefix);
 const sc = csi.InstallEBSSC(cluster, scDriver);
-const scName = sc.metadata.name;
 
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
 
 if (config.requireBoolean("cluster-autoscaler-enabled")) {
     autoscaler.InstallAutoScaler(cluster, env);
+}
+
+if (config.requireBoolean("tidb-operator-enabled")) {
+    const tidbOperator = serverless.InstallTiDBOperator(cluster.provider);
+    if (config.requireBoolean("serverless-enabled")) {
+        serverless.InstallServerless(cluster.provider, prefix, scDriver, sc, tidbOperator)
+    }
 }
