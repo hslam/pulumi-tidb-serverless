@@ -48,10 +48,8 @@ interface ManagedNodeGroupArgs {
     options: NodeGroupOptions;
     env: string;
     role: aws.iam.Role;
-    instanceProfile: aws.iam.InstanceProfile;
     cluster: eks.Cluster;
     prefix: string;
-    availabilityZone: string;
     subnetIds: pulumi.Input<pulumi.Input<string>[]>;
     maxUnavailable: number;
 }

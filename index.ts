@@ -14,7 +14,6 @@ const config = new pulumi.Config();
 
 export const env = config.require("env");
 export const region = config.require("region");
-export const availableZone = config.get("available-zone") || `${region}a`;
 export const prefix = `${env}-${region}-tidb`;
 export const cidrBlock = config.require("cidr-block");
 const numberOfAvailabilityZones = config.getNumber("availability-zones") || 3;
@@ -52,17 +51,17 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
     instanceRoles: [managedASGRole],
 });
 
+
+// Create a managed node group with component name.
 export function createManagedNodeGroup(
     name: string,
 ): eks.ManagedNodeGroup {
-    return asg.createManagedNodeGroup(`${prefix}-${availableZone}-serverless-${name}`, {
+    return asg.createManagedNodeGroup(`${prefix}-serverless-${name}`, {
         options: asg.loadNodeGroupOptions(name),
         env: env,
         role: managedASGRole,
-        instanceProfile: instanceProfile,
         cluster: cluster,
         prefix: prefix,
-        availabilityZone: availableZone,
         subnetIds: allVpcSubnets,
         maxUnavailable: 1,
     });
