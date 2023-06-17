@@ -159,7 +159,7 @@ export function InstallCSIDriver(c: eks.Cluster, env: string, cluster: string, .
             chart: "aws-ebs-csi-driver",
             fetchOpts: {
                 repo: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver",
-                version: "2.6.4",
+                version: "2.19.0",
             },
             namespace: "kube-system",
             values: {
@@ -215,6 +215,9 @@ export function InstallEBSSC(c: eks.Cluster, driver: k8s.helm.v3.Chart) {
             volumeBindingMode: "WaitForFirstConsumer",
             allowVolumeExpansion: true,
             mountOptions: ["nodelalloc", "noatime"],
+            parameters: {
+                type: "gp3",
+            },
         },
         {deleteBeforeReplace: true, provider: c.provider, dependsOn: driver.ready}
     );

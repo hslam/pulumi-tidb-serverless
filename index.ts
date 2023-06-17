@@ -64,7 +64,6 @@ if (config.requireBoolean("nodegroup-enabled")) {
             role: managedASGRole,
             cluster: cluster,
             prefix: prefix,
-            subnetIds: allVpcSubnets,
             maxUnavailable: 1,
         });
         nodeGroups.push(nodeGroup);

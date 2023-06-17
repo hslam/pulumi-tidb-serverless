@@ -58,7 +58,6 @@ interface ManagedNodeGroupArgs {
     role: aws.iam.Role;
     cluster: eks.Cluster;
     prefix: string;
-    subnetIds: pulumi.Input<pulumi.Input<string>[]>;
     maxUnavailable: number;
 }
 
@@ -68,7 +67,6 @@ export function createManagedNodeGroup(
 ): eks.ManagedNodeGroup {
     let managedNodeGroupOptions: eks.ManagedNodeGroupOptions = {
         cluster: args.cluster,
-        subnetIds: args.subnetIds,
         capacityType: args.options.capacityType,
         scalingConfig: {
             maxSize: args.options.max,
