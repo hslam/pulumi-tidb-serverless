@@ -42,7 +42,7 @@ config:
       category: "compute"
       instanceTypes: [ "t2.medium" ]
       capacityType: "SPOT"
-      min: 3
+      min: 2
       max: 10
   pulumi-shared-storage-tidb:cluster-autoscaler-enabled: false
   pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.26.2"
