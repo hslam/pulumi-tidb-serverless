@@ -1,12 +1,12 @@
 config:
   aws:region: us-east-1
-  pulumi-shared-storage-tidb:region: us-east-1
-  pulumi-shared-storage-tidb:env: dev
-  pulumi-shared-storage-tidb:suffix: f01
-  pulumi-shared-storage-tidb:cidr-block: 10.0.0.0/16
-  pulumi-shared-storage-tidb:k8s-version: "1.24"
+  pulumi-shared-storage-tidb:cluster-region: us-east-1
+  pulumi-shared-storage-tidb:cluster-env: dev
+  pulumi-shared-storage-tidb:cluster-suffix: f01
+  pulumi-shared-storage-tidb:cluster-cidr-block: 10.0.0.0/16
+  pulumi-shared-storage-tidb:cluster-k8s-version: "1.24"
   pulumi-shared-storage-tidb:nodegroup-enabled: false
-  pulumi-shared-storage-tidb:ami-id: ami-08c95f33fc51670df
+  pulumi-shared-storage-tidb:nodegroup-ami-id: ami-08c95f33fc51670df
   pulumi-shared-storage-tidb:nodegroups:
     - component: "default"
       tier: "standard"

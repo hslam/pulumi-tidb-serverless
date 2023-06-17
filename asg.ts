@@ -6,7 +6,7 @@ import * as eks from "@pulumi/eks";
 import * as pulumi from "@pulumi/pulumi";
 
 const config = new pulumi.Config();
-const amiId = config.require("ami-id");
+const amiId = config.require("nodegroup-ami-id");
 
 export interface NodeGroupOptions {
     component: string;

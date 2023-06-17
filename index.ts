@@ -13,12 +13,12 @@ import * as serverless from "./serverless";
 
 const config = new pulumi.Config();
 
-export const env = config.require("env");
-export const region = config.require("region");
-export const suffix = config.require("suffix");
+export const env = config.require("cluster-env");
+export const region = config.require("cluster-region");
+export const suffix = config.require("cluster-suffix");
 export const prefix = `${env}-${region}-${suffix}`;
-export const cidrBlock = config.require("cidr-block");
-const k8sVersion = config.require("k8s-version");
+export const cidrBlock = config.require("cluster-cidr-block");
+const k8sVersion = config.require("cluster-k8s-version");
 
 // Allocate a new VPC with custom settings, and a public & private subnet per AZ.
 const vpc = new awsx.ec2.Vpc(`${prefix}-vpc`, {
