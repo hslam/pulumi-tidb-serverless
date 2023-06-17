@@ -54,30 +54,28 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
 
-if (config.requireBoolean("nodegroup-enabled")) {
-    const nodeGroups: eks.ManagedNodeGroup[] = [];
-    for (const options of asg.loadNodeGroupOptionsList()) {
-        // Create a managed node group with the options.
-        const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
-            options: options,
-            env: env,
-            role: managedASGRole,
-            cluster: cluster,
-            prefix: prefix,
-            maxUnavailable: 1,
-        });
-        nodeGroups.push(nodeGroup);
-    }
-    const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...nodeGroups);
-    const sc = csi.InstallEBSSC(cluster, scDriver);
-    const scName = sc.metadata.name;
-    if (config.requireBoolean("cluster-autoscaler-enabled")) {
-        autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
-    }
-    if (config.requireBoolean("tidb-operator-enabled")) {
-        const tidbOperator = serverless.InstallTiDBOperator(cluster.provider, ...nodeGroups);
-        if (config.requireBoolean("serverless-enabled")) {
-            serverless.InstallServerless(cluster.provider, prefix, scDriver, sc, tidbOperator, ...nodeGroups)
-        }
+const nodeGroups: eks.ManagedNodeGroup[] = [];
+for (const options of asg.loadNodeGroupOptionsList()) {
+    // Create a managed node group with the options.
+    const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
+        options: options,
+        env: env,
+        role: managedASGRole,
+        cluster: cluster,
+        prefix: prefix,
+        maxUnavailable: 1,
+    });
+    nodeGroups.push(nodeGroup);
+}
+const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...nodeGroups);
+const sc = csi.InstallEBSSC(cluster, scDriver);
+const scName = sc.metadata.name;
+if (config.requireBoolean("cluster-autoscaler-enabled")) {
+    autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
+}
+if (config.requireBoolean("tidb-operator-enabled")) {
+    const tidbOperator = serverless.InstallTiDBOperator(cluster.provider, ...nodeGroups);
+    if (config.requireBoolean("serverless-enabled")) {
+        serverless.InstallServerless(cluster.provider, prefix, scDriver, sc, tidbOperator, ...nodeGroups)
     }
 }
