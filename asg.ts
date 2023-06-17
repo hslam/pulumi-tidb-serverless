@@ -8,11 +8,13 @@ import * as pulumi from "@pulumi/pulumi";
 const config = new pulumi.Config();
 const amiId = config.require("ami-id");
 
-interface NodeGroupOptions {
-    category: string;
+export interface NodeGroupOptions {
     component: string;
+    tier: string;
+    version: number;
+    category: string;
     ami: string;
-    instanceType: aws.ec2.InstanceType;
+    instanceTypes: string [];
     capacityType: string;
     min: number;
     max: number;
@@ -20,27 +22,33 @@ interface NodeGroupOptions {
 }
 
 const defaultNodeGroupOptions: NodeGroupOptions = {
-    category: "control-plane",
     component: "default",
+    tier: "standard",
+    version: 0,
+    category: "control-plane",
     ami: amiId,
-    instanceType: aws.ec2.InstanceType.T2_Medium,
+    instanceTypes: ["t2.medium"],
     capacityType: "ON_DEMAND",
     min: 0,
     max: 100,
     exclusive: true,
 };
 
-export function existNodeGroupOptions(name: string): boolean {
-    const options = config.getObject<NodeGroupOptions>(`${name}-nodegroup`);
-    return options != null;
+export function nodeGroupName(options: NodeGroupOptions): string {
+    return `${options.component}-${options.tier}-${options.version}`;
 }
 
-export function loadNodeGroupOptions(name: string): NodeGroupOptions {
-    const options = config.requireObject<NodeGroupOptions>(`${name}-nodegroup`);
-    return {
-        ...defaultNodeGroupOptions,
-        ...options,
-    };
+export function loadNodeGroupOptionsList(): NodeGroupOptions[] {
+    const optionsList = config.requireObject<NodeGroupOptions[]>(`nodegroups`);
+    const list: NodeGroupOptions[] = [];
+    for (const options of optionsList) {
+        const overrideOptions: NodeGroupOptions = {
+            ...defaultNodeGroupOptions,
+            ...options,
+        };
+        list.push(overrideOptions);
+    }
+    return list;
 }
 
 // Creates an EKS ManagedNodeGroup.
@@ -67,7 +75,7 @@ export function createManagedNodeGroup(
             desiredSize: args.options.min,
             minSize: args.options.min,
         },
-        instanceTypes: [args.options.instanceType as string],
+        instanceTypes: args.options.instanceTypes,
         nodeRole: args.role,
         updateConfig: {
             maxUnavailable: args.maxUnavailable,

@@ -18,12 +18,10 @@ export const region = config.require("region");
 export const suffix = config.require("suffix");
 export const prefix = `${env}-${region}-${suffix}`;
 export const cidrBlock = config.require("cidr-block");
-const numberOfAvailabilityZones = config.getNumber("availability-zones") || 3;
 const k8sVersion = config.require("k8s-version");
 
 // Allocate a new VPC with custom settings, and a public & private subnet per AZ.
 const vpc = new awsx.ec2.Vpc(`${prefix}-vpc`, {
-    numberOfAvailabilityZones: numberOfAvailabilityZones,
     cidrBlock: cidrBlock,
     subnets: [{type: "public"}, {type: "private"}],
 });
@@ -53,12 +51,19 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
     instanceRoles: [managedASGRole],
 });
 
+const scDriver = csi.InstallCSIDriver(cluster, env, prefix);
+const sc = csi.InstallEBSSC(cluster, scDriver);
+const scName = sc.metadata.name;
+
+// Export the cluster's kubeconfig.
+export const kubeconfig = cluster.kubeconfig;
+
 // Create a managed node group with component name.
 export function createManagedNodeGroup(
-    name: string,
+    options: asg.NodeGroupOptions,
 ): eks.ManagedNodeGroup {
-    return asg.createManagedNodeGroup(`${prefix}-serverless-${name}`, {
-        options: asg.loadNodeGroupOptions(name),
+    return asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
+        options: options,
         env: env,
         role: managedASGRole,
         cluster: cluster,
@@ -68,32 +73,19 @@ export function createManagedNodeGroup(
     });
 }
 
-if (asg.existNodeGroupOptions("default")) {
-    const defaultASG = createManagedNodeGroup("default");
-}
-if (asg.existNodeGroupOptions("pd")) {
-    const pdASG = createManagedNodeGroup("pd");
-}
-if (asg.existNodeGroupOptions("tikv")) {
-    const tikvASG = createManagedNodeGroup("tikv");
-}
-if (asg.existNodeGroupOptions("tidb")) {
-    const tidbASG = createManagedNodeGroup("tidb");
-}
-
-const scDriver = csi.InstallCSIDriver(cluster, env, prefix);
-const sc = csi.InstallEBSSC(cluster, scDriver);
-
-// Export the cluster's kubeconfig.
-export const kubeconfig = cluster.kubeconfig;
-
-if (config.requireBoolean("cluster-autoscaler-enabled")) {
-    autoscaler.InstallAutoScaler(cluster, env);
-}
-
-if (config.requireBoolean("tidb-operator-enabled")) {
-    const tidbOperator = serverless.InstallTiDBOperator(cluster.provider);
-    if (config.requireBoolean("serverless-enabled")) {
-        serverless.InstallServerless(cluster.provider, prefix, scDriver, sc, tidbOperator)
+if (config.requireBoolean("nodegroup-enabled")) {
+    const nodeGroups: eks.ManagedNodeGroup[] = [];
+    for (const options of asg.loadNodeGroupOptionsList()) {
+        const nodeGroup = createManagedNodeGroup(options);
+        nodeGroups.push(nodeGroup);
+    }
+    if (config.requireBoolean("cluster-autoscaler-enabled")) {
+        autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
+    }
+    if (config.requireBoolean("tidb-operator-enabled")) {
+        const tidbOperator = serverless.InstallTiDBOperator(cluster.provider, ...nodeGroups);
+        if (config.requireBoolean("serverless-enabled")) {
+            serverless.InstallServerless(cluster.provider, prefix, scDriver, sc, tidbOperator, ...nodeGroups)
+        }
     }
 }

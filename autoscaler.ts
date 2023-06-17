@@ -10,7 +10,7 @@ const config = new pulumi.Config();
 const downThreshold = config.get("cluster-autoscaler-down-threshold") || 0.5;
 const caVersion = config.require("cluster-autoscaler-ca-version");
 
-export function InstallAutoScaler(c: eks.Cluster, env: string) {
+export function InstallAutoScaler(c: eks.Cluster, env: string, ...dependencies: pulumi.Input<pulumi.Resource>[]) {
     const clusterAutoScalerSaName = "cluster-autoscaler";
 
     const oidc = c.core.oidcProvider!;
@@ -97,7 +97,7 @@ export function InstallAutoScaler(c: eks.Cluster, env: string) {
             },
             path: "manifests/aws-cluster-auto-scaler",
         },
-        {provider: c.provider, dependsOn: [clusterAutoScalerSa]}
+        {provider: c.provider, dependsOn: [clusterAutoScalerSa, ...dependencies]}
     );
     return chart.getResourceProperty("apps/v1/Deployment", "kube-system", "cluster-autoscaler", "metadata").uid;
 }
