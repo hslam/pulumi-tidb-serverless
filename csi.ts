@@ -6,7 +6,7 @@ import * as eks from "@pulumi/eks";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
-export function InstallCSIDriver(c: eks.Cluster, env: string, cluster: string) {
+export function InstallCSIDriver(c: eks.Cluster, env: string, cluster: string, ...dependencies: pulumi.Input<pulumi.Resource>[]) {
     const ebsCSIControllerSaName = "ebs-csi-controller-sa";
 
     const oidc = c.core.oidcProvider!;
@@ -200,7 +200,7 @@ export function InstallCSIDriver(c: eks.Cluster, env: string, cluster: string) {
                 },
             },
         },
-        {provider: c.provider, dependsOn: [ebsCSIControllerSa]}
+        {provider: c.provider, dependsOn: [ebsCSIControllerSa, ...dependencies]}
     );
 }
 

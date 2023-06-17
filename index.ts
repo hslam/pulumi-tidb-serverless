@@ -51,10 +51,6 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
     instanceRoles: [managedASGRole],
 });
 
-const scDriver = csi.InstallCSIDriver(cluster, env, prefix);
-const sc = csi.InstallEBSSC(cluster, scDriver);
-const scName = sc.metadata.name;
-
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
 
@@ -79,6 +75,9 @@ if (config.requireBoolean("nodegroup-enabled")) {
         const nodeGroup = createManagedNodeGroup(options);
         nodeGroups.push(nodeGroup);
     }
+    const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...nodeGroups);
+    const sc = csi.InstallEBSSC(cluster, scDriver);
+    const scName = sc.metadata.name;
     if (config.requireBoolean("cluster-autoscaler-enabled")) {
         autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
     }
