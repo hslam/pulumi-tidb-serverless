@@ -4,9 +4,9 @@ config:
   pulumi-shared-storage-tidb:cluster-env: dev
   pulumi-shared-storage-tidb:cluster-suffix: f01
   pulumi-shared-storage-tidb:cluster-cidr-block: 10.0.0.0/16
-  pulumi-shared-storage-tidb:cluster-k8s-version: "1.24"
+  pulumi-shared-storage-tidb:cluster-k8s-version: "1.26"
   pulumi-shared-storage-tidb:nodegroup-enabled: false
-  pulumi-shared-storage-tidb:nodegroup-ami-id: ami-08c95f33fc51670df
+  pulumi-shared-storage-tidb:nodegroup-ami-id: ami-0f7abd12e02335c8d
   pulumi-shared-storage-tidb:nodegroups:
     - component: "default"
       tier: "standard"
@@ -42,7 +42,7 @@ config:
       min: 3
       max: 10
   pulumi-shared-storage-tidb:cluster-autoscaler-enabled: false
-  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.24.2"
+  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.26.2"
   pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: 0.5
   pulumi-shared-storage-tidb:tidb-operator-enabled: false
   pulumi-shared-storage-tidb:tidb-operator-tag: v1.4.4
