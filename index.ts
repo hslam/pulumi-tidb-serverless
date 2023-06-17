@@ -54,25 +54,19 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
 
-// Create a managed node group with component name.
-export function createManagedNodeGroup(
-    options: asg.NodeGroupOptions,
-): eks.ManagedNodeGroup {
-    return asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
-        options: options,
-        env: env,
-        role: managedASGRole,
-        cluster: cluster,
-        prefix: prefix,
-        subnetIds: allVpcSubnets,
-        maxUnavailable: 1,
-    });
-}
-
 if (config.requireBoolean("nodegroup-enabled")) {
     const nodeGroups: eks.ManagedNodeGroup[] = [];
     for (const options of asg.loadNodeGroupOptionsList()) {
-        const nodeGroup = createManagedNodeGroup(options);
+        // Create a managed node group with the options.
+        const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
+            options: options,
+            env: env,
+            role: managedASGRole,
+            cluster: cluster,
+            prefix: prefix,
+            subnetIds: allVpcSubnets,
+            maxUnavailable: 1,
+        });
         nodeGroups.push(nodeGroup);
     }
     const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...nodeGroups);

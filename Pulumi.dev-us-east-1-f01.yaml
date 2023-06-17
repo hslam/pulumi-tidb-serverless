@@ -6,11 +6,12 @@ config:
   pulumi-shared-storage-tidb:cluster-cidr-block: 10.0.0.0/16
   pulumi-shared-storage-tidb:cluster-k8s-version: "1.26"
   pulumi-shared-storage-tidb:nodegroup-enabled: false
-  pulumi-shared-storage-tidb:nodegroup-ami-id: ami-0f7abd12e02335c8d
+  pulumi-shared-storage-tidb:nodegroup-default-ami-id: ami-0f7abd12e02335c8d
   pulumi-shared-storage-tidb:nodegroups:
     - component: "default"
       tier: "standard"
       version: 0
+      ami: ami-0f7abd12e02335c8d
       category: "control-plane"
       instanceTypes: [ "t2.xlarge" ]
       capacityType: "SPOT"
@@ -20,6 +21,7 @@ config:
     - component: "pd"
       tier: "standard"
       version: 0
+      ami: ami-0f7abd12e02335c8d
       category: "control-plane"
       instanceTypes: [ "t2.medium" ]
       capacityType: "ON_DEMAND"
@@ -28,6 +30,7 @@ config:
     - component: "tikv"
       tier: "standard"
       version: 0
+      ami: ami-0f7abd12e02335c8d
       category: "storage"
       instanceTypes: [ "t2.medium" ]
       capacityType: "ON_DEMAND"
@@ -36,6 +39,7 @@ config:
     - component: "tidb"
       tier: "standard"
       version: 0
+      ami: ami-0f7abd12e02335c8d
       category: "compute"
       instanceTypes: [ "t2.medium" ]
       capacityType: "SPOT"

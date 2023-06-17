@@ -6,14 +6,14 @@ import * as eks from "@pulumi/eks";
 import * as pulumi from "@pulumi/pulumi";
 
 const config = new pulumi.Config();
-const amiId = config.require("nodegroup-ami-id");
+const amiId = config.require("nodegroup-default-ami-id");
 
 export interface NodeGroupOptions {
     component: string;
     tier: string;
     version: number;
-    category: string;
     ami: string;
+    category: string;
     instanceTypes: string [];
     capacityType: string;
     min: number;
@@ -25,8 +25,8 @@ const defaultNodeGroupOptions: NodeGroupOptions = {
     component: "default",
     tier: "standard",
     version: 0,
-    category: "control-plane",
     ami: amiId,
+    category: "control-plane",
     instanceTypes: ["t2.medium"],
     capacityType: "ON_DEMAND",
     min: 0,
