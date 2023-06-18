@@ -54,7 +54,8 @@ const cluster = new eks.Cluster(`${prefix}-cluster`, {
 // Export the cluster's kubeconfig.
 export const kubeconfig = cluster.kubeconfig;
 
-const nodeGroups: eks.ManagedNodeGroup[] = [];
+const dependencies: pulumi.Input<pulumi.Resource>[] = [];
+
 for (const options of asg.loadNodeGroupOptionsList()) {
     // Create a managed node group with the options.
     const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
@@ -65,17 +66,25 @@ for (const options of asg.loadNodeGroupOptionsList()) {
         prefix: prefix,
         maxUnavailable: 1,
     });
-    nodeGroups.push(nodeGroup);
+    dependencies.push(nodeGroup);
 }
-const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...nodeGroups);
-const sc = csi.InstallEBSSC(cluster, scDriver);
-const scName = sc.metadata.name;
+
 if (config.getObject("cluster-autoscaler-enabled") || false) {
-    autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
+    autoscaler.InstallAutoScaler(cluster, env, ...dependencies);
 }
+
+const csiDriverEnabled = config.getObject("csi-driver-enabled") || false;
+if (csiDriverEnabled) {
+    const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...dependencies);
+    dependencies.push(scDriver);
+    const sc = csi.InstallEBSSC(cluster, scDriver);
+    dependencies.push(sc);
+}
+
 if (config.getObject("tidb-operator-enabled") || false) {
-    const tidbOperator = serverless.InstallTiDBOperator(cluster.provider, ...nodeGroups);
-    if (config.getObject("serverless-enabled") || false) {
-        serverless.InstallServerless(cluster.provider, prefix, scDriver, sc, tidbOperator, ...nodeGroups)
+    const tidbOperator = serverless.InstallTiDBOperator(cluster.provider, ...dependencies);
+    dependencies.push(tidbOperator);
+    if (csiDriverEnabled && config.getObject("serverless-enabled") || false) {
+        serverless.InstallServerless(cluster.provider, prefix, ...dependencies)
     }
 }

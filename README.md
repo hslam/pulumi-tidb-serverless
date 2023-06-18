@@ -139,6 +139,7 @@ ebs-sc          ebs.csi.aws.com         Delete          WaitForFirstConsumer   t
 Set the Pulumi configuration variables for the shared storage TiDB cluster.
 ```
 $ pulumi config set pulumi-shared-storage-tidb:cluster-autoscaler-enabled true
+$ pulumi config set pulumi-shared-storage-tidb:csi-driver-enabled true
 $ pulumi config set pulumi-shared-storage-tidb:tidb-operator-enabled true
 $ pulumi config set pulumi-shared-storage-tidb:serverless-enabled true
 ```
@@ -172,7 +173,7 @@ Resources:
 Duration: 1m8s
 ```
 The update takes ~2 minutes and will create the following resources on AWS:
-* An Cluster Autoscaler.
+* An Cluster Autoscaler for node group.
 * An TiDB Operator.
 * A shared TiKV Cluster, a shared PD cluster and two tenant TiDB cluster.
 ```

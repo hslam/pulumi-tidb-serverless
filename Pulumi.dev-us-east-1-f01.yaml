@@ -47,6 +47,7 @@ config:
   pulumi-shared-storage-tidb:cluster-autoscaler-enabled: false
   pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.26.2"
   pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: 0.5
+  pulumi-shared-storage-tidb:csi-driver-enabled: false
   pulumi-shared-storage-tidb:tidb-operator-enabled: false
   pulumi-shared-storage-tidb:tidb-operator-tag: v1.4.4
   pulumi-shared-storage-tidb:serverless-enabled: false
