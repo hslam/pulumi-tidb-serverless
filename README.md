@@ -198,6 +198,47 @@ serverless-cluster-tikv-1                       1/1     Running   0          11m
 serverless-cluster-tikv-2                       1/1     Running   0          11m   10.0.149.226   ip-10-0-139-243.ec2.internal
 ```
 
+### Connect to tenant TiDB
+* Install the MySQL client.
+* Get a list of services in the tidb-serverless namespace.
+```
+$ kubectl -n tidb-serverless get svc
+NAME                                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)               AGE
+serverless-cluster-discovery            ClusterIP   172.20.184.109   <none>        10261/TCP,10262/TCP   17m
+serverless-cluster-pd                   ClusterIP   172.20.152.4     <none>        2379/TCP              17m
+serverless-cluster-pd-peer              ClusterIP   None             <none>        2380/TCP,2379/TCP     17m
+serverless-cluster-tenant-1-tidb        ClusterIP   172.20.237.49    <none>        4000/TCP,10080/TCP    17m
+serverless-cluster-tenant-1-tidb-peer   ClusterIP   None             <none>        10080/TCP             17m
+serverless-cluster-tenant-2-tidb        ClusterIP   172.20.75.98     <none>        4000/TCP,10080/TCP    17m
+serverless-cluster-tenant-2-tidb-peer   ClusterIP   None             <none>        10080/TCP             17m
+serverless-cluster-tidb                 ClusterIP   172.20.39.246    <none>        4000/TCP,10080/TCP    15m
+serverless-cluster-tidb-peer            ClusterIP   None             <none>        10080/TCP             15m
+serverless-cluster-tikv-peer            ClusterIP   None             <none>        20160/TCP             16m
+```
+* Forward tenant TiDB port from the local host to the cluster.
+```
+$ kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-1-tidb 14001:4000 > pf14001.out &
+$ kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-2-tidb 14002:4000 > pf14002.out &
+```
+* Connect to the tenant TiDB service.
+```
+$ mysql --comments -h 127.0.0.1 -P 14001 -u root -e 'use test; create table if not exists `tenant_1_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));'
+$ mysql --comments -h 127.0.0.1 -P 14002 -u root -e 'use test; create table if not exists `tenant_2_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));'
+
+$ mysql --comments -h 127.0.0.1 -P 14001 -u root -e 'use test; show tables;'
++----------------+
+| Tables_in_test |
++----------------+
+| tenant_1_tbl   |
++----------------+
+$ mysql --comments -h 127.0.0.1 -P 14002 -u root -e 'use test; show tables;'
++----------------+
+| Tables_in_test |
++----------------+
+| tenant_2_tbl   |
++----------------+
+```
+
 ## License
 This package is licensed under a MIT license (Copyright (c) 2023 Meng Huang)
 

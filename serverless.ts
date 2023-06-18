@@ -136,6 +136,11 @@ function CreateTC(
         {
             provider: provider,
             dependsOn: [...dependencies],
+            customTimeouts: {
+                create: "15m",
+                delete: "15m",
+                update: "15m",
+            },
         }
     );
 }

@@ -70,12 +70,12 @@ for (const options of asg.loadNodeGroupOptionsList()) {
 const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...nodeGroups);
 const sc = csi.InstallEBSSC(cluster, scDriver);
 const scName = sc.metadata.name;
-if (config.requireBoolean("cluster-autoscaler-enabled")) {
+if (config.getObject("cluster-autoscaler-enabled") || false) {
     autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
 }
-if (config.requireBoolean("tidb-operator-enabled")) {
+if (config.getObject("tidb-operator-enabled") || false) {
     const tidbOperator = serverless.InstallTiDBOperator(cluster.provider, ...nodeGroups);
-    if (config.requireBoolean("serverless-enabled")) {
+    if (config.getObject("serverless-enabled") || false) {
         serverless.InstallServerless(cluster.provider, prefix, scDriver, sc, tidbOperator, ...nodeGroups)
     }
 }

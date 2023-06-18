@@ -12,7 +12,7 @@ config:
       version: 0
       ami: ami-0f7abd12e02335c8d
       category: "control-plane"
-      instanceTypes: [ "t2.xlarge" ]
+      instanceTypes: [ "t2.medium" ]
       capacityType: "SPOT"
       min: 2
       max: 10
