@@ -7,7 +7,7 @@ import * as pulumi from "@pulumi/pulumi";
 const config = new pulumi.Config();
 
 const nsName = config.get<string>("serverless-namespace") || "tidb-serverless";
-const tidbOperatorTag = config.require("tidb-operator-tag");
+const tidbOperatorTag = config.get<string>("tidb-operator-tag") || "v1.4.4";
 const preAllocKeyspaces = config.getObject<string[]>("serverless-pre-alloc-keyspaces") || [];
 const pdReplicas = config.getNumber("serverless-pd-replicas") || 1;
 const pdVersion = config.get<string>("serverless-pd-version") || "v7.1.0";
@@ -36,7 +36,7 @@ export function InstallTiDBOperator(provider: k8s.Provider, ...dependencies: pul
             repositoryOpts: {
                 repo: "https://charts.pingcap.org/",
             },
-            version: "v1.4.4",
+            version: `${tidbOperatorTag}`,
             values: {
                 scheduler: {
                     kubeSchedulerImageName: "registry.k8s.io/kube-scheduler",
