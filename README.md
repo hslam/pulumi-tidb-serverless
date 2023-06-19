@@ -373,8 +373,6 @@ Destroy all of its infrastructure with `pulumi destroy`.
 $ pulumi destroy
 Destroying (dev-us-east-1-f01)
 
-View in Browser (Ctrl+O): https://app.pulumi.com/mhboy/pulumi-shared-storage-tidb/dev-us-east-1-f01/updates/76
-
      Type                                    Name                                                         Status             
  -   pulumi:pulumi:Stack                     pulumi-shared-storage-tidb-dev-us-east-1-f01                 deleted            
  -   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        deleted            
