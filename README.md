@@ -12,7 +12,7 @@ Deploy a shared storage TiDB cluster on AWS using pulumi.
 * [Install AWS IAM Authenticator for Kubernetes](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
 
 ### Initialize the Pulumi Project
-1. Start by cloning the project to your local machine.
+1. Start by cloning the [pulumi-shared-storage-tidb](https://github.com/hslam/pulumi-shared-storage-tidb) to your local machine.
 ```
 $ git clone https://github.com/hslam/pulumi-shared-storage-tidb.git
 $ cd pulumi-shared-storage-tidb
@@ -190,9 +190,14 @@ VolumeBindingMode:  WaitForFirstConsumer
 ```
 
 ### Deploying Shared Storage TiDB Cluster
-
 Set the Pulumi configuration variables for the shared storage TiDB cluster.
+* Set a password for each tenant.
+* Enable the shared storage TiDB cluster.
 ```
+$ export PASSWORD_TENANT_1="admin-1"
+$ export PASSWORD_TENANT_2="admin-2"
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[0].rootPassword' "${PASSWORD_TENANT_1}"
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[1].rootPassword' "${PASSWORD_TENANT_2}"
 $ pulumi config set pulumi-shared-storage-tidb:serverless-enabled true
 ```
 Deploy the shared storage TiDB cluster by running `pulumi up`.
@@ -234,7 +239,7 @@ kube-public       Active   26m
 kube-system       Active   26m
 tidb-serverless   Active   12m
 ```
-View the Pod status in the tidb-serverless namespace..
+View the Pod status in the tidb-serverless namespace.
 ```
 $ kubectl -n tidb-serverless get po -o wide -l app.kubernetes.io/component=pd
 NAME                      READY   STATUS    RESTARTS   AGE    IP            NODE                           NOMINATED NODE   READINESS GATES
@@ -255,8 +260,7 @@ serverless-cluster-tenant-1-tidb-0   2/2     Running   0          8m19s   10.0.2
 serverless-cluster-tenant-2-tidb-0   2/2     Running   0          8m19s   10.0.55.52     ip-10-0-0-246.ec2.internal    <none>           <none>
 ```
 
-### Connect to tenant TiDB
-* Install the MySQL client.
+### Use `kubectl port-forward` to access tenant TiDB service.
 * Get a list of TiDB services in the tidb-serverless namespace.
 ```
 $ kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb
@@ -266,23 +270,85 @@ serverless-cluster-tenant-1-tidb-peer   ClusterIP   None            <none>      
 serverless-cluster-tenant-2-tidb        ClusterIP   172.20.196.78   <none>        4000/TCP,10080/TCP   11m
 serverless-cluster-tenant-2-tidb-peer   ClusterIP   None            <none>        10080/TCP            11m
 ```
-* Forward tenant TiDB port from the local host to the cluster.
+* Forward tenant TiDB port from the local host to the k8s cluster.
 ```
 $ kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-1-tidb 14001:4000 > pf14001.out &
 $ kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-2-tidb 14002:4000 > pf14002.out &
 ```
-* Connect to the tenant TiDB service.
+* Export the variable of the tenant TiDB service.
 ```
-$ mysql --comments -h 127.0.0.1 -P 14001 -u root -e 'use test; create table if not exists `tenant_1_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));'
-$ mysql --comments -h 127.0.0.1 -P 14002 -u root -e 'use test; create table if not exists `tenant_2_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));'
+$ export HOST_TENANT_1=127.0.0.1
+$ export HOST_TENANT_2=127.0.0.1
 
-$ mysql --comments -h 127.0.0.1 -P 14001 -u root -e 'use test; show tables;'
+$ export PORT_TENANT_1=14001
+$ export PORT_TENANT_2=14002
+```
+
+### Expose tenant TiDB service over the internet(Optional).
+If you want to expose tenant TiDB service over the internet and if you are aware of the risks of doing this,
+you can set the following Pulumi configuration variables.
+```
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[0].externalIP' true
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[1].externalIP' true
+```
+Expose tenant TiDB service external IP by running `pulumi up`.
+```
+$ pulumi up
+Updating (dev-us-east-1-f01)
+
+     Type                                               Name                                           Status           Info
+     pulumi:pulumi:Stack                                pulumi-shared-storage-tidb-dev-us-east-1-f01                    
+     ├─ eks:index:Cluster                               dev-us-east-1-f01-cluster                                       
+     ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-1                   
+ ~   │  └─ kubernetes:pingcap.com/v1alpha1:TidbCluster  tidb-serverless/serverless-cluster-tenant-1    updated (1s)     [diff: ~spec]
+     └─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-2                   
+ ~      └─ kubernetes:pingcap.com/v1alpha1:TidbCluster  tidb-serverless/serverless-cluster-tenant-2    updated (2s)     [diff: ~spec]
+
+Outputs:
+    kubeconfig   : { ... }
+
+Resources:
+    ~ 2 updated
+    115 unchanged
+
+Duration: 41s
+```
+* Get a list of TiDB services in the tidb-serverless namespace.
+```
+$  kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep -v "<none>"
+NAME                                    TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                          AGE
+serverless-cluster-tenant-1-tidb        LoadBalancer   172.20.89.2      a1c8454fb86394982b9db853fb80a9db-1883777515.us-east-1.elb.amazonaws.com   4000:32585/TCP,10080:31425/TCP   11m
+serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.44.158    ab039dc44805a43e3bb1daeb939e07d3-1382204841.us-east-1.elb.amazonaws.com   4000:32472/TCP,10080:32490/TCP   11m
+```
+* Export the variable of the tenant TiDB service.
+```
+$ export HOST_TENANT_1=`kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep -v "<none>" | grep tenant-1 |awk '{print $4}'`
+$ export HOST_TENANT_2=`kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep -v "<none>" | grep tenant-2 |awk '{print $4}'`
+
+$ export PORT_TENANT_1="4000"
+$ export PORT_TENANT_2="4000"
+```
+
+### Access the database.
+
+* Install the MySQL client.
+
+* Access the tenant TiDB service and create a table in the test database.
+```
+$ mysql --comments -h ${HOST_TENANT_1} -P ${PORT_TENANT_1} -u root --password=${PASSWORD_TENANT_1} \
+    -e 'use test; create table if not exists `tenant_1_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));'
+$ mysql --comments -h ${HOST_TENANT_2} -P ${PORT_TENANT_2} -u root --password=${PASSWORD_TENANT_2} \
+    -e 'use test; create table if not exists `tenant_2_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));'
+
+$ mysql --comments -h ${HOST_TENANT_1} -P ${PORT_TENANT_1} -u root --password=${PASSWORD_TENANT_1} \
+    -e 'use test; show tables;'
 +----------------+
 | Tables_in_test |
 +----------------+
 | tenant_1_tbl   |
 +----------------+
-$ mysql --comments -h 127.0.0.1 -P 14002 -u root -e 'use test; show tables;'
+$ mysql --comments -h ${HOST_TENANT_2} -P ${PORT_TENANT_2} -u root --password=${PASSWORD_TENANT_2} \
+    -e 'use test; show tables;'
 +----------------+
 | Tables_in_test |
 +----------------+
@@ -312,6 +378,10 @@ $ kubectl -n tidb-serverless delete tc --all
 ```
 Set the Pulumi configuration variables to destroy the shared storage TiDB cluster.
 ```
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[0].externalIP' false
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[1].externalIP' false
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[0].rootPassword' ""
+$ pulumi config set --path 'pulumi-shared-storage-tidb:serverless-keyspaces[1].rootPassword' ""
 $ pulumi config set pulumi-shared-storage-tidb:serverless-enabled false
 ```
 Destroy the shared storage TiDB cluster by running `pulumi up`.

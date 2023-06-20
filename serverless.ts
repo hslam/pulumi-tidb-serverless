@@ -8,7 +8,7 @@ const config = new pulumi.Config();
 
 const nsName = config.get<string>("serverless-namespace") || "tidb-serverless";
 const tidbOperatorTag = config.get<string>("tidb-operator-tag") || "v1.4.4";
-const preAllocKeyspaces = config.getObject<string[]>("serverless-pre-alloc-keyspaces") || [];
+const keyspaces = config.getObject<Keyspace[]>(`serverless-keyspaces`) || [];
 const pdReplicas = config.getNumber("serverless-pd-replicas") || 1;
 const pdVersion = config.get<string>("serverless-pd-version") || "v7.1.0";
 const pdStorageSize = config.get<string>("serverless-pd-storage-size") || "10Gi";
@@ -17,6 +17,20 @@ const tikvVersion = config.get<string>("serverless-tikv-version") || "v7.1.0";
 const tikvStorageSize = config.get<string>("serverless-tikv-storage-size") || "10Gi";
 const tidbReplicas = config.getNumber("serverless-tidb-replicas") || 1;
 const tidbVersion = config.get<string>("serverless-tidb-version") || "v7.1.0";
+
+interface Keyspace {
+    name: string;
+    tidbReplicas: number;
+    rootPassword: string;
+    externalIP: boolean;
+}
+
+const defaultKeyspace: Keyspace = {
+    name: "",
+    tidbReplicas: 0,
+    rootPassword: "",
+    externalIP: false,
+};
 
 // Install TiDB Operator.
 export function InstallTiDBOperator(provider: k8s.Provider, ...dependencies: pulumi.Input<pulumi.Resource>[]) {
@@ -59,13 +73,70 @@ export function InstallServerless(provider: k8s.Provider, prefix: string, ...dep
         },
         {provider: provider, dependsOn: [...dependencies]},
     );
+
     // Create shared TiKV cluster.
-    const sharedTC = CreateSharedTC(provider, prefix, nsName, "serverless-cluster", pdReplicas, tidbReplicas, tikvReplicas, preAllocKeyspaces, ns, ...dependencies);
-    for (const keyspace of preAllocKeyspaces) {
-        // Create tenant TiDB cluster.
-        CreateTenantTiDBTC(provider, prefix, nsName, `serverless-cluster-${keyspace}`, "serverless-cluster", nsName, 1, keyspace, ns, sharedTC, ...dependencies);
+    const sharedTC = CreateSharedTC(provider, prefix, nsName, "serverless-cluster", pdReplicas, tidbReplicas, tikvReplicas, keyspaces, ns, ...dependencies);
+    for (const keyspace of keyspaces) {
+        if (keyspace.name.length > 0 && keyspace.tidbReplicas > 0) {
+            // Create tenant TiDB cluster.
+            const tenantTCName = `serverless-cluster-${keyspace.name}`
+            const tenantTC = CreateTenantTiDBTC(provider, prefix, nsName, tenantTCName, "serverless-cluster", nsName, keyspace, ns, sharedTC, ...dependencies);
+            if (keyspace.rootPassword.length > 0) {
+                const tenantSecretName = `serverless-secret-${keyspace.name}`
+                const tenantSecret = new k8s.core.v1.Secret(
+                    `${prefix}-serverless-secret-${keyspace.name}`,
+                    {
+                        metadata: {
+                            name: tenantSecretName,
+                            namespace: nsName,
+                        },
+                        data: {"root": btoa(keyspace.rootPassword)},
+                    },
+                    {provider: provider, dependsOn: [ns, sharedTC, tenantTC, ...dependencies]},
+                );
+                const tenantTiDBInitializerName = `serverless-initializer-${keyspace.name}`
+                CreateTiDBInitializer(provider, prefix, nsName, tenantTiDBInitializerName, tenantTCName, nsName, tenantSecretName, ns, sharedTC, tenantTC, tenantSecret, ...dependencies);
+            }
+        }
     }
 }
+
+
+function CreateTiDBInitializer(
+    provider: k8s.Provider,
+    prefix: string,
+    ns: string,
+    name: string,
+    externalName: string,
+    externalNamespace: string,
+    passwordSecret: string,
+    ...dependencies: pulumi.Input<pulumi.Resource>[]
+) {
+    return new k8s.yaml.ConfigFile(
+        prefix + "-" + name,
+        {
+            file: "manifests/serverless/tidb-initializer.yaml",
+            transformations: [
+                withNamespace(ns),
+                withName(name),
+                withExternalCluster(externalName, externalNamespace),
+                withTiDBInitializerPasswordSecret(passwordSecret),
+            ],
+        },
+        {
+            provider: provider,
+            dependsOn: [...dependencies],
+        }
+    );
+}
+
+function withTiDBInitializerPasswordSecret(passwordSecret: string) {
+    return (obj: any, _opts: pulumi.CustomResourceOptions) => {
+        assertGVK(obj, "pingcap.com/v1alpha1", "TidbInitializer");
+        obj.spec.passwordSecret = passwordSecret;
+    };
+}
+
 
 function CreateSharedTC(
     provider: k8s.Provider,
@@ -75,10 +146,10 @@ function CreateSharedTC(
     pdReplicas: number,
     tidbReplicas: number,
     tikvReplicas: number,
-    keyspaces: string[],
+    keyspaces: Keyspace[],
     ...dependencies: pulumi.Input<pulumi.Resource>[]
 ) {
-    return CreateTC(provider, prefix, nsName, name, "", "", pdReplicas, tidbReplicas, tikvReplicas, keyspaces, "", ...dependencies);
+    return CreateTC(provider, prefix, nsName, name, "", "", pdReplicas, tidbReplicas, tikvReplicas, keyspaces, defaultKeyspace, ...dependencies);
 }
 
 function CreateTenantTiDBTC(
@@ -88,11 +159,10 @@ function CreateTenantTiDBTC(
     name: string,
     externalName: string,
     externalNamespace: string,
-    tidbReplicas: number,
-    keyspace: string,
+    keyspace: Keyspace,
     ...dependencies: pulumi.Input<pulumi.Resource>[]
 ) {
-    return CreateTC(provider, prefix, nsName, name, externalName, externalNamespace, 0, tidbReplicas, 0, [], keyspace, ...dependencies);
+    return CreateTC(provider, prefix, nsName, name, externalName, externalNamespace, 0, keyspace.tidbReplicas, 0, [], keyspace, ...dependencies);
 }
 
 function CreateTC(
@@ -105,13 +175,19 @@ function CreateTC(
     pdReplicas: number,
     tidbReplicas: number,
     tikvReplicas: number,
-    keyspaces: string[],
-    keyspace: string,
+    keyspaces: Keyspace[],
+    keyspace: Keyspace,
     ...dependencies: pulumi.Input<pulumi.Resource>[]
 ) {
-    var preAlloc = `[]`
-    if (keyspaces.length > 0) {
-        preAlloc = `["${keyspaces.join(`", "`)}"]`
+    const keyspaceNames: string[] = [];
+    for (const keyspace of keyspaces) {
+        if (keyspace.name.length > 0) {
+            keyspaceNames.push(keyspace.name)
+        }
+    }
+    let preAllocKeyspaces = `[]`
+    if (keyspaceNames.length > 0) {
+        preAllocKeyspaces = `["${keyspaceNames.join(`", "`)}"]`
     }
     return new k8s.yaml.ConfigFile(
         prefix + "-" + name,
@@ -129,8 +205,8 @@ function CreateTC(
                 withTiDBClusterReplicas("pd", pdReplicas),
                 withTiDBClusterReplicas("tidb", tidbReplicas),
                 withTiDBClusterReplicas("tikv", tikvReplicas),
-                withTiDBClusterConfigItem("pd", "{{PreAllocKeyspaces}}", preAlloc),
-                withTiDBClusterConfigItem("tidb", "{{KeyspaceName}}", `"${keyspace}"`),
+                withTiDBClusterConfigItem("pd", "{{PreAllocKeyspaces}}", preAllocKeyspaces),
+                withTiDBClusterKeyspace("tidb", keyspace),
             ],
         },
         {
@@ -159,7 +235,6 @@ export function withName(name: string) {
 
 export function withExternalCluster(name: string, ns: string) {
     return (obj: any, _opts: pulumi.CustomResourceOptions) => {
-        assertGVK(obj, "pingcap.com/v1alpha1", "TidbCluster");
         if (name.length > 0) {
             obj.spec.cluster.name = name;
             if (ns.length > 0) {
@@ -223,6 +298,26 @@ function withTiDBClusterReplicas(name: string, replicas: number) {
     };
 }
 
+function withTiDBClusterKeyspace(name: string, keyspace: Keyspace) {
+    return (obj: any, _opts: pulumi.CustomResourceOptions) => {
+        assertGVK(obj, "pingcap.com/v1alpha1", "TidbCluster");
+        if (name === "tidb") {
+            if (obj.spec.tidb != null) {
+                if (keyspace.name.length > 0) {
+                    obj.spec.tidb.config = (obj.spec.tidb.config as string).replace("{{KeyspaceName}}", `"${keyspace.name}"`);
+                    if (keyspace.externalIP) {
+                        obj.spec.tidb.service.type = "LoadBalancer";
+                    }
+                } else {
+                    obj.spec.tidb.config = (obj.spec.tidb.config as string).replace("{{KeyspaceName}}", `""`);
+                    obj.spec.tidb.nodeSelector = null;
+                    obj.spec.tidb.tolerations = null;
+                }
+            }
+        }
+    };
+}
+
 function withTiDBClusterConfigItem(name: string, pattern: string, value: string) {
     return (obj: any, _opts: pulumi.CustomResourceOptions) => {
         assertGVK(obj, "pingcap.com/v1alpha1", "TidbCluster");
@@ -237,10 +332,6 @@ function withTiDBClusterConfigItem(name: string, pattern: string, value: string)
         } else if (name === "tidb") {
             if (obj.spec.tidb != null) {
                 obj.spec.tidb.config = (obj.spec.tidb.config as string).replace(pattern, value);
-                if (pattern === "{{KeyspaceName}}" && value === `""`) {
-                    obj.spec.tidb.nodeSelector = null;
-                    obj.spec.tidb.tolerations = null;
-                }
             }
         }
     };

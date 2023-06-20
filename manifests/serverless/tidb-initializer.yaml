@@ -1,0 +1,12 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TidbInitializer
+metadata:
+  name: basic-initializer
+  namespace: "tidb-cluster"
+spec:
+  image: tnir/mysqlclient
+  imagePullPolicy: IfNotPresent
+  cluster:
+    name: basic
+    namespace: "tidb-cluster"
+  passwordSecret: "basic-secret"

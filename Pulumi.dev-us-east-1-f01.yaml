@@ -1,63 +1,71 @@
 config:
   aws:region: us-east-1
-  pulumi-shared-storage-tidb:cluster-region: us-east-1
-  pulumi-shared-storage-tidb:cluster-env: dev
-  pulumi-shared-storage-tidb:cluster-suffix: f01
+  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.26.2"
+  pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: "0.5"
+  pulumi-shared-storage-tidb:cluster-autoscaler-enabled: "false"
   pulumi-shared-storage-tidb:cluster-cidr-block: 10.0.0.0/16
+  pulumi-shared-storage-tidb:cluster-env: dev
   pulumi-shared-storage-tidb:cluster-k8s-version: "1.26"
+  pulumi-shared-storage-tidb:cluster-region: us-east-1
+  pulumi-shared-storage-tidb:cluster-suffix: f01
+  pulumi-shared-storage-tidb:csi-driver-enabled: "false"
   pulumi-shared-storage-tidb:nodegroup-default-ami-id: ami-0f7abd12e02335c8d
   pulumi-shared-storage-tidb:nodegroups:
-    - component: "default"
-      tier: "standard"
-      version: 0
-      ami: ami-0f7abd12e02335c8d
-      category: "control-plane"
-      instanceTypes: [ "t2.medium" ]
+    - ami: ami-0f7abd12e02335c8d
       capacityType: "SPOT"
-      min: 2
-      max: 10
+      category: "control-plane"
+      component: "default"
       exclusive: false
-    - component: "pd"
-      tier: "standard"
-      version: 0
-      ami: ami-0f7abd12e02335c8d
-      category: "control-plane"
-      instanceTypes: [ "t2.medium" ]
-      capacityType: "ON_DEMAND"
-      min: 3
-      max: 5
-    - component: "tikv"
-      tier: "standard"
-      version: 0
-      ami: ami-0f7abd12e02335c8d
-      category: "storage"
-      instanceTypes: [ "t2.medium" ]
-      capacityType: "ON_DEMAND"
-      min: 3
-      max: 9
-    - component: "tidb"
-      tier: "standard"
-      version: 0
-      ami: ami-0f7abd12e02335c8d
-      category: "compute"
-      instanceTypes: [ "t2.medium" ]
-      capacityType: "SPOT"
-      min: 2
+      instanceTypes: ["t2.medium"]
       max: 10
-  pulumi-shared-storage-tidb:cluster-autoscaler-enabled: false
-  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.26.2"
-  pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: 0.5
-  pulumi-shared-storage-tidb:csi-driver-enabled: false
-  pulumi-shared-storage-tidb:tidb-operator-enabled: false
-  pulumi-shared-storage-tidb:tidb-operator-tag: v1.4.4
-  pulumi-shared-storage-tidb:serverless-enabled: false
+      min: 2
+      tier: "standard"
+      version: 0
+    - ami: ami-0f7abd12e02335c8d
+      capacityType: "ON_DEMAND"
+      category: "control-plane"
+      component: "pd"
+      instanceTypes: ["t2.medium"]
+      max: 5
+      min: 3
+      tier: "standard"
+      version: 0
+    - ami: ami-0f7abd12e02335c8d
+      capacityType: "ON_DEMAND"
+      category: "storage"
+      component: "tikv"
+      instanceTypes: ["t2.medium"]
+      max: 9
+      min: 3
+      tier: "standard"
+      version: 0
+    - ami: ami-0f7abd12e02335c8d
+      capacityType: "SPOT"
+      category: "compute"
+      component: "tidb"
+      instanceTypes: ["t2.medium"]
+      max: 10
+      min: 2
+      tier: "standard"
+      version: 0
+  pulumi-shared-storage-tidb:serverless-enabled: "false"
+  pulumi-shared-storage-tidb:serverless-keyspaces:
+    - externalIP: false
+      name: "tenant-1"
+      rootPassword: ""
+      tidbReplicas: 1
+    - externalIP: false
+      name: "tenant-2"
+      rootPassword: ""
+      tidbReplicas: 1
   pulumi-shared-storage-tidb:serverless-namespace: tidb-serverless
-  pulumi-shared-storage-tidb:serverless-pre-alloc-keyspaces: [ "tenant-1", "tenant-2" ]
-  pulumi-shared-storage-tidb:serverless-pd-replicas: 3
-  pulumi-shared-storage-tidb:serverless-pd-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-pd-replicas: "3"
   pulumi-shared-storage-tidb:serverless-pd-storage-size: "10Gi"
-  pulumi-shared-storage-tidb:serverless-tikv-replicas: 3
-  pulumi-shared-storage-tidb:serverless-tikv-version: v7.1.0
-  pulumi-shared-storage-tidb:serverless-tikv-storage-size: "10Gi"
+  pulumi-shared-storage-tidb:serverless-pd-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-tidb-replicas: "1"
   pulumi-shared-storage-tidb:serverless-tidb-version: v7.1.0
-  pulumi-shared-storage-tidb:serverless-tidb-replicas: 1
+  pulumi-shared-storage-tidb:serverless-tikv-replicas: "3"
+  pulumi-shared-storage-tidb:serverless-tikv-storage-size: "10Gi"
+  pulumi-shared-storage-tidb:serverless-tikv-version: v7.1.0
+  pulumi-shared-storage-tidb:tidb-operator-enabled: "false"
+  pulumi-shared-storage-tidb:tidb-operator-tag: v1.4.4
