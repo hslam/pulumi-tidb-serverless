@@ -43,7 +43,7 @@ spec:
       internal-proxy = true
       [replication]
       enable-placement-rules = true
-      isolation-level = "topology.kubernetes.io/zone",
+      isolation-level = "topology.kubernetes.io/zone"
       location-labels = ["topology.kubernetes.io/region", "topology.kubernetes.io/zone", "kubernetes.io/hostname"]
       max-replicas = 3
       [keyspace]

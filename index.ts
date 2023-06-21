@@ -27,11 +27,11 @@ const serverlessEnabled = config.getObject("serverless-enabled") || false;
 const vpc = new awsx.ec2.Vpc(`${prefix}-vpc`, {
     numberOfAvailabilityZones: numberOfAvailabilityZones,
     cidrBlock: cidrBlock,
-    subnets: [{type: "public"}, {type: "private"}],
+    subnetSpecs: [{type: awsx.ec2.SubnetType.Public}, {type: awsx.ec2.SubnetType.Private}],
 });
 
 // Export VPC ID and Subnets.
-export const vpcId = vpc.id;
+export const vpcId = vpc.vpcId;
 export const allVpcSubnets = pulumi.all([vpc.privateSubnetIds, vpc.publicSubnetIds])
     .apply(([privateSubnetIds, publicSubnetIds]) => privateSubnetIds.concat(publicSubnetIds).sort((a, b) => (a > b ? -1 : 1)));
 export const privateSubnetIds = pulumi.all([vpc.privateSubnetIds])
