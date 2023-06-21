@@ -20,6 +20,8 @@ export const prefix = `${env}-${region}-${suffix}`;
 export const cidrBlock = config.require("cluster-cidr-block");
 const k8sVersion = config.require("cluster-k8s-version");
 const numberOfAvailabilityZones = config.getNumber("cluster-availability-zones") || 3;
+const controlPlaneEnabled = config.getObject("control-plane-enabled") || false;
+const serverlessEnabled = config.getObject("serverless-enabled") || false;
 
 // Allocate a new VPC with custom settings, and a public & private subnet per AZ.
 const vpc = new awsx.ec2.Vpc(`${prefix}-vpc`, {
@@ -104,24 +106,18 @@ for (const options of asg.loadNodeGroupOptionsList()) {
     }
 }
 
-if (config.getObject("cluster-autoscaler-enabled") || false) {
-    autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
-}
-
 const dependencies: pulumi.Input<pulumi.Resource>[] = [...nodeGroups];
-
-const csiDriverEnabled = config.getObject("csi-driver-enabled") || false;
-if (csiDriverEnabled) {
+if (controlPlaneEnabled) {
+    const clusterAutoScaler = autoscaler.InstallAutoScaler(cluster, env, ...nodeGroups);
+    dependencies.push(clusterAutoScaler);
     const scDriver = csi.InstallCSIDriver(cluster, env, prefix, ...nodeGroups);
     dependencies.push(scDriver);
     const sc = csi.InstallEBSSC(cluster, scDriver);
     dependencies.push(sc);
-}
-
-if (config.getObject("tidb-operator-enabled") || false) {
     const tidbOperator = serverless.InstallTiDBOperator(cluster.provider, ...nodeGroups);
     dependencies.push(tidbOperator);
-    if (csiDriverEnabled && config.getObject("serverless-enabled") || false) {
-        serverless.InstallServerless(cluster.provider, prefix, ...dependencies)
-    }
+}
+
+if (controlPlaneEnabled && serverlessEnabled) {
+    serverless.InstallServerless(cluster.provider, prefix, ...dependencies)
 }

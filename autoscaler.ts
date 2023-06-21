@@ -99,5 +99,5 @@ export function InstallAutoScaler(c: eks.Cluster, env: string, ...dependencies: 
         },
         {provider: c.provider, dependsOn: [clusterAutoScalerSa, ...dependencies]}
     );
-    return chart.getResourceProperty("apps/v1/Deployment", "kube-system", "cluster-autoscaler", "metadata").uid;
+    return chart;
 }

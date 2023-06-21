@@ -123,9 +123,7 @@ kube-proxy-zv7tq           1/1     Running   0          6m29s   10.0.254.64    i
 ### Deploying Control Plane
 Set the Pulumi configuration variables for the control plane.
 ```
-$ pulumi config set pulumi-shared-storage-tidb:cluster-autoscaler-enabled true
-$ pulumi config set pulumi-shared-storage-tidb:csi-driver-enabled true
-$ pulumi config set pulumi-shared-storage-tidb:tidb-operator-enabled true
+$ pulumi config set pulumi-shared-storage-tidb:control-plane-enabled true
 ```
 Deploy the control plane components by running `pulumi up`.
 ```
@@ -416,9 +414,7 @@ Duration: 51s
 ### Destroying Control Plane
 Set the Pulumi configuration variables to destroy the control plane resources.
 ```
-$ pulumi config set pulumi-shared-storage-tidb:cluster-autoscaler-enabled false
-$ pulumi config set pulumi-shared-storage-tidb:csi-driver-enabled false
-$ pulumi config set pulumi-shared-storage-tidb:tidb-operator-enabled false
+$ pulumi config set pulumi-shared-storage-tidb:control-plane-enabled false
 ```
 Destroy the control plane resources by running `pulumi up`.
 ```
