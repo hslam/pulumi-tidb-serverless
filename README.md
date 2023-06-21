@@ -32,20 +32,19 @@ Create the EKS cluster by running `pulumi up`.
 $ pulumi up
 Updating (dev-us-east-1-f01)
 
-     Type                                    Name                                                         Status        
- +   pulumi:pulumi:Stack                     pulumi-shared-storage-tidb-dev-us-east-1-f01                 created (788s) 
- +   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        created (2s)  
- +   ├─ eks:index:Cluster                    dev-us-east-1-f01-cluster                                    created (784s)      
+     Type                                    Name                                                         Status              
+ +   pulumi:pulumi:Stack                     pulumi-shared-storage-tidb-dev-us-east-1-f01                 created (738s)      
+ +   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        created (3s)        
+ +   ├─ eks:index:Cluster                    dev-us-east-1-f01-cluster                                    created (734s)      
  +   ├─ aws:iam:Role                         dev-us-east-1-f01-managed-nodegroup-role                     created (2s)        
- +   ├─ aws:iam:InstanceProfile              dev-us-east-1-f01-instance-profile                           created (2s)        
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-default-standard-0                         created (7s)        
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tidb-standard-0                            created (9s)        
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-pd-standard-0                   created (6s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-tikv-standard-0                 created (4s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-pd-standard-0                   created (7s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tidb-standard-0                            created (8s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-pd-standard-0                   created (9s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-tikv-standard-0                 created (10s)       
  +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-pd-standard-0                   created (10s)       
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-pd-standard-0                   created (8s)        
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-tikv-standard-0                 created (10s)       
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-tikv-standard-0                 created (3s)        
- +   └─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-tikv-standard-0                 created (9s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-default-standard-0                         created (11s)       
+ +   └─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-tikv-standard-0                 created (11s)       
 
 Outputs:
     kubeconfig   : {
@@ -60,7 +59,7 @@ Outputs:
 Resources:
     + 83 created
 
-Duration: 15m54s
+Duration: 15m10s
 ```
 The update takes 15-20 minutes and will create the following resources on AWS:
 * A VPC in the region, with public & private subnets across the region's 3 availability zones.
@@ -74,51 +73,71 @@ Once the update is complete, verify the cluster, node groups, and Pods are up an
 $ pulumi stack output kubeconfig > kubeconfig.yml && export KUBECONFIG=$PWD/kubeconfig.yml
 
 $ kubectl get nodes -l serverless.tidbcloud.com/node=default
-NAME                          STATUS   ROLES    AGE     VERSION
-ip-10-0-148-79.ec2.internal   Ready    <none>   5m5s    v1.26.4-eks-0a21954
-ip-10-0-254-64.ec2.internal   Ready    <none>   4m35s   v1.26.4-eks-0a21954
+NAME                           STATUS   ROLES    AGE     VERSION
+ip-10-0-103-193.ec2.internal   Ready    <none>   4m53s   v1.26.4-eks-0a21954
+ip-10-0-142-148.ec2.internal   Ready    <none>   5m11s   v1.26.4-eks-0a21954
 
 $ kubectl get nodes -l serverless.tidbcloud.com/node=pd
 NAME                           STATUS   ROLES    AGE     VERSION
-ip-10-0-202-131.ec2.internal   Ready    <none>   4m46s   v1.26.4-eks-0a21954
-ip-10-0-230-80.ec2.internal    Ready    <none>   4m49s   v1.26.4-eks-0a21954
-ip-10-0-60-40.ec2.internal     Ready    <none>   4m51s   v1.26.4-eks-0a21954
+ip-10-0-112-81.ec2.internal    Ready    <none>   4m55s   v1.26.4-eks-0a21954
+ip-10-0-156-152.ec2.internal   Ready    <none>   5m37s   v1.26.4-eks-0a21954
+ip-10-0-165-88.ec2.internal    Ready    <none>   5m13s   v1.26.4-eks-0a21954
 
 $ kubectl get nodes -l serverless.tidbcloud.com/node=tikv
-NAME                         STATUS   ROLES    AGE     VERSION
-ip-10-0-119-4.ec2.internal   Ready    <none>   5m44s   v1.26.4-eks-0a21954
-ip-10-0-3-111.ec2.internal   Ready    <none>   5m50s   v1.26.4-eks-0a21954
-ip-10-0-88-95.ec2.internal   Ready    <none>   5m40s   v1.26.4-eks-0a21954
+NAME                           STATUS   ROLES    AGE     VERSION
+ip-10-0-111-58.ec2.internal    Ready    <none>   5m13s   v1.26.4-eks-0a21954
+ip-10-0-153-52.ec2.internal    Ready    <none>   5m10s   v1.26.4-eks-0a21954
+ip-10-0-163-161.ec2.internal   Ready    <none>   5m41s   v1.26.4-eks-0a21954
 
 $ kubectl get nodes -l serverless.tidbcloud.com/node=tidb
-NAME                          STATUS   ROLES    AGE     VERSION
-ip-10-0-0-246.ec2.internal    Ready    <none>   5m41s   v1.26.4-eks-0a21954
-ip-10-0-217-91.ec2.internal   Ready    <none>   5m26s   v1.26.4-eks-0a21954
+NAME                           STATUS   ROLES    AGE     VERSION
+ip-10-0-127-213.ec2.internal   Ready    <none>   5m33s   v1.26.4-eks-0a21954
+ip-10-0-182-86.ec2.internal    Ready    <none>   5m41s   v1.26.4-eks-0a21954
+
+
+$ kubectl label --list nodes -l serverless.tidbcloud.com/node=default | grep "topology.kubernetes.io/zone"
+ topology.kubernetes.io/zone=us-east-1a
+ topology.kubernetes.io/zone=us-east-1b
+
+$ kubectl label --list nodes -l serverless.tidbcloud.com/node=pd | grep "topology.kubernetes.io/zone"
+ topology.kubernetes.io/zone=us-east-1a
+ topology.kubernetes.io/zone=us-east-1b
+ topology.kubernetes.io/zone=us-east-1c
+
+$ kubectl label --list nodes -l serverless.tidbcloud.com/node=tikv | grep "topology.kubernetes.io/zone"
+ topology.kubernetes.io/zone=us-east-1a
+ topology.kubernetes.io/zone=us-east-1b
+ topology.kubernetes.io/zone=us-east-1c
+
+$ kubectl label --list nodes -l serverless.tidbcloud.com/node=tidb | grep "topology.kubernetes.io/zone"
+ topology.kubernetes.io/zone=us-east-1a
+ topology.kubernetes.io/zone=us-east-1c
+
 
 $ kubectl -n kube-system get po -o wide
 NAME                       READY   STATUS    RESTARTS   AGE     IP             NODE                           NOMINATED NODE   READINESS GATES
-aws-node-5hwvz             1/1     Running   0          6m51s   10.0.88.95     ip-10-0-88-95.ec2.internal     <none>           <none>
-aws-node-6g9xl             1/1     Running   0          6m22s   10.0.60.40     ip-10-0-60-40.ec2.internal     <none>           <none>
-aws-node-btc8j             1/1     Running   0          6m20s   10.0.230.80    ip-10-0-230-80.ec2.internal    <none>           <none>
-aws-node-c7pdr             1/1     Running   0          6m17s   10.0.202.131   ip-10-0-202-131.ec2.internal   <none>           <none>
-aws-node-mmbmt             1/1     Running   0          6m29s   10.0.254.64    ip-10-0-254-64.ec2.internal    <none>           <none>
-aws-node-pm5l2             1/1     Running   0          6m59s   10.0.148.79    ip-10-0-148-79.ec2.internal    <none>           <none>
-aws-node-rkd2w             1/1     Running   0          6m37s   10.0.0.246     ip-10-0-0-246.ec2.internal     <none>           <none>
-aws-node-rq2d7             1/1     Running   0          6m22s   10.0.217.91    ip-10-0-217-91.ec2.internal    <none>           <none>
-aws-node-vr969             1/1     Running   0          7m1s    10.0.3.111     ip-10-0-3-111.ec2.internal     <none>           <none>
-aws-node-xw8ln             1/1     Running   0          6m55s   10.0.119.4     ip-10-0-119-4.ec2.internal     <none>           <none>
-coredns-55fb5d545d-bgfmj   1/1     Running   0          12m     10.0.159.221   ip-10-0-148-79.ec2.internal    <none>           <none>
-coredns-55fb5d545d-n4nm9   1/1     Running   0          12m     10.0.166.99    ip-10-0-148-79.ec2.internal    <none>           <none>
-kube-proxy-4477m           1/1     Running   0          6m51s   10.0.88.95     ip-10-0-88-95.ec2.internal     <none>           <none>
-kube-proxy-4b29v           1/1     Running   0          7m1s    10.0.3.111     ip-10-0-3-111.ec2.internal     <none>           <none>
-kube-proxy-72r4w           1/1     Running   0          6m55s   10.0.119.4     ip-10-0-119-4.ec2.internal     <none>           <none>
-kube-proxy-c6znr           1/1     Running   0          6m22s   10.0.60.40     ip-10-0-60-40.ec2.internal     <none>           <none>
-kube-proxy-cdqvq           1/1     Running   0          6m20s   10.0.230.80    ip-10-0-230-80.ec2.internal    <none>           <none>
-kube-proxy-rvj2s           1/1     Running   0          6m37s   10.0.0.246     ip-10-0-0-246.ec2.internal     <none>           <none>
-kube-proxy-v7glw           1/1     Running   0          6m17s   10.0.202.131   ip-10-0-202-131.ec2.internal   <none>           <none>
-kube-proxy-vqf6n           1/1     Running   0          6m22s   10.0.217.91    ip-10-0-217-91.ec2.internal    <none>           <none>
-kube-proxy-wjgnc           1/1     Running   0          6m59s   10.0.148.79    ip-10-0-148-79.ec2.internal    <none>           <none>
-kube-proxy-zv7tq           1/1     Running   0          6m29s   10.0.254.64    ip-10-0-254-64.ec2.internal    <none>           <none>
+aws-node-2qfcv             1/1     Running   0          7m45s   10.0.111.58    ip-10-0-111-58.ec2.internal    <none>           <none>
+aws-node-55r8p             1/1     Running   0          8m4s    10.0.182.86    ip-10-0-182-86.ec2.internal    <none>           <none>
+aws-node-64fdw             1/1     Running   0          7m43s   10.0.103.193   ip-10-0-103-193.ec2.internal   <none>           <none>
+aws-node-fbdlm             1/1     Running   0          8m17s   10.0.156.152   ip-10-0-156-152.ec2.internal   <none>           <none>
+aws-node-lfqdb             1/1     Running   0          7m35s   10.0.112.81    ip-10-0-112-81.ec2.internal    <none>           <none>
+aws-node-mt9hw             1/1     Running   0          8m13s   10.0.163.161   ip-10-0-163-161.ec2.internal   <none>           <none>
+aws-node-p6mhl             1/1     Running   0          7m42s   10.0.153.52    ip-10-0-153-52.ec2.internal    <none>           <none>
+aws-node-qnx25             1/1     Running   0          7m56s   10.0.127.213   ip-10-0-127-213.ec2.internal   <none>           <none>
+aws-node-r7r7r             1/1     Running   0          7m53s   10.0.165.88    ip-10-0-165-88.ec2.internal    <none>           <none>
+aws-node-svfwc             1/1     Running   0          8m1s    10.0.142.148   ip-10-0-142-148.ec2.internal   <none>           <none>
+coredns-55fb5d545d-22fhz   1/1     Running   0          14m     10.0.146.242   ip-10-0-142-148.ec2.internal   <none>           <none>
+coredns-55fb5d545d-jhpnn   1/1     Running   0          14m     10.0.129.82    ip-10-0-142-148.ec2.internal   <none>           <none>
+kube-proxy-6zt86           1/1     Running   0          7m45s   10.0.111.58    ip-10-0-111-58.ec2.internal    <none>           <none>
+kube-proxy-9z6k4           1/1     Running   0          8m17s   10.0.156.152   ip-10-0-156-152.ec2.internal   <none>           <none>
+kube-proxy-bb59t           1/1     Running   0          8m13s   10.0.163.161   ip-10-0-163-161.ec2.internal   <none>           <none>
+kube-proxy-h5qxg           1/1     Running   0          7m56s   10.0.127.213   ip-10-0-127-213.ec2.internal   <none>           <none>
+kube-proxy-jc26k           1/1     Running   0          7m35s   10.0.112.81    ip-10-0-112-81.ec2.internal    <none>           <none>
+kube-proxy-kh88n           1/1     Running   0          8m4s    10.0.182.86    ip-10-0-182-86.ec2.internal    <none>           <none>
+kube-proxy-m6lp6           1/1     Running   0          7m53s   10.0.165.88    ip-10-0-165-88.ec2.internal    <none>           <none>
+kube-proxy-pmt82           1/1     Running   0          8m1s    10.0.142.148   ip-10-0-142-148.ec2.internal   <none>           <none>
+kube-proxy-qxsds           1/1     Running   0          7m43s   10.0.103.193   ip-10-0-103-193.ec2.internal   <none>           <none>
+kube-proxy-r7w88           1/1     Running   0          7m42s   10.0.153.52    ip-10-0-153-52.ec2.internal    <none>           <none>
 ```
 ### Deploying Control Plane
 Set the Pulumi configuration variables for the control plane.
@@ -130,56 +149,56 @@ Deploy the control plane components by running `pulumi up`.
 $ pulumi up
 Updating (dev-us-east-1-f01)
 
-     Type                                                               Name                                          Status              
-     pulumi:pulumi:Stack                                                pulumi-shared-storage-tidb-dev-us-east-1-f01                      
-     ├─ eks:index:Cluster                                               dev-us-east-1-f01-cluster                                         
- +   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       created (0.88s)     
- +   ├─ kubernetes:helm.sh/v3:Chart                                     aws-ebs-csi-driver                            created (1s)        
- +   ├─ kubernetes:storage.k8s.io/v1:StorageClass                       ebs-sc                                        created (0.88s)     
- +   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            created (1s)        
- +   └─ kubernetes:helm.sh/v3:Release                                   tidb-operator                                 created (37s)       
+     Type                                                               Name                                          Status            
+     pulumi:pulumi:Stack                                                pulumi-shared-storage-tidb-dev-us-east-1-f01                    
+     ├─ eks:index:Cluster                                               dev-us-east-1-f01-cluster                                       
+ +   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       created (1s)      
+ +   ├─ kubernetes:helm.sh/v3:Chart                                     aws-ebs-csi-driver                            created (2s)      
+ +   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            created (3s)      
+ +   ├─ kubernetes:helm.sh/v3:Release                                   tidb-operator                                 created (26s)     
+ +   └─ kubernetes:storage.k8s.io/v1:StorageClass                       ebs-sc                                        created (1s)      
 
 Outputs:
     kubeconfig   : { ... }
 
 Resources:
     + 42 created
-    62 unchanged
+    83 unchanged
 
-Duration: 1m29s
+Duration: 59s
 ```
-The update takes ~2 minutes and will create the following resources on AWS:
+The update takes ~1 minutes and will create the following resources on AWS:
 * An Cluster Autoscaler for node group.
 * An EBS CSI Driver and an EBS StorageClass.
-* An TiDB Operator.
+* TiDB Operator CRDs and an TiDB Operator.
 
 Confirm that the control plane components are running, run the following command.
 ```
 $ kubectl -n kube-system get po -o wide
 NAME                                       READY   STATUS    RESTARTS   AGE     IP             NODE                           NOMINATED NODE   READINESS GATES
-cluster-autoscaler-6d9499f467-dcrhn        1/1     Running   0          9m43s   10.0.162.0     ip-10-0-148-79.ec2.internal    <none>           <none>
-cluster-autoscaler-6d9499f467-tv6x5        1/1     Running   0          9m43s   10.0.196.240   ip-10-0-254-64.ec2.internal    <none>           <none>
-ebs-csi-controller-78dc48fd5-4wvpd         5/5     Running   0          9m39s   10.0.254.164   ip-10-0-254-64.ec2.internal    <none>           <none>
-ebs-csi-controller-78dc48fd5-kxbp9         5/5     Running   0          9m39s   10.0.151.58    ip-10-0-148-79.ec2.internal    <none>           <none>
-ebs-csi-node-6jbxp                         3/3     Running   0          9m39s   10.0.15.0      ip-10-0-60-40.ec2.internal     <none>           <none>
-ebs-csi-node-ddl8z                         3/3     Running   0          9m39s   10.0.64.65     ip-10-0-119-4.ec2.internal     <none>           <none>
-ebs-csi-node-dpfmb                         3/3     Running   0          9m39s   10.0.37.138    ip-10-0-3-111.ec2.internal     <none>           <none>
-ebs-csi-node-dxds4                         3/3     Running   0          9m39s   10.0.7.122     ip-10-0-0-246.ec2.internal     <none>           <none>
-ebs-csi-node-f5ppb                         3/3     Running   0          9m39s   10.0.214.110   ip-10-0-254-64.ec2.internal    <none>           <none>
-ebs-csi-node-fbdmd                         3/3     Running   0          9m39s   10.0.111.171   ip-10-0-88-95.ec2.internal     <none>           <none>
-ebs-csi-node-fpgfd                         3/3     Running   0          9m39s   10.0.236.243   ip-10-0-217-91.ec2.internal    <none>           <none>
-ebs-csi-node-g7cj2                         3/3     Running   0          9m39s   10.0.241.149   ip-10-0-202-131.ec2.internal   <none>           <none>
-ebs-csi-node-mgvbl                         3/3     Running   0          9m39s   10.0.233.240   ip-10-0-230-80.ec2.internal    <none>           <none>
-ebs-csi-node-pb228                         3/3     Running   0          9m39s   10.0.174.169   ip-10-0-148-79.ec2.internal    <none>           <none>
-tidb-controller-manager-6ff7d8fb84-q82mz   1/1     Running   0          8m49s   10.0.248.170   ip-10-0-254-64.ec2.internal    <none>           <none>
-tidb-scheduler-58d9f8d69-wf2vb             2/2     Running   0          8m49s   10.0.201.124   ip-10-0-254-64.ec2.internal    <none>           <none>
+cluster-autoscaler-6d9499f467-hnfrr        1/1     Running   0          4m32s   10.0.149.2     ip-10-0-142-148.ec2.internal   <none>           <none>
+cluster-autoscaler-6d9499f467-vsfjw        1/1     Running   0          4m32s   10.0.120.139   ip-10-0-103-193.ec2.internal   <none>           <none>
+ebs-csi-controller-78dc48fd5-2rm4v         5/5     Running   0          4m28s   10.0.132.4     ip-10-0-142-148.ec2.internal   <none>           <none>
+ebs-csi-controller-78dc48fd5-txvq2         5/5     Running   0          4m28s   10.0.124.98    ip-10-0-103-193.ec2.internal   <none>           <none>
+ebs-csi-node-7ztw5                         3/3     Running   0          4m27s   10.0.155.116   ip-10-0-156-152.ec2.internal   <none>           <none>
+ebs-csi-node-9dxn5                         3/3     Running   0          4m27s   10.0.167.179   ip-10-0-163-161.ec2.internal   <none>           <none>
+ebs-csi-node-b8tcm                         3/3     Running   0          4m28s   10.0.172.123   ip-10-0-165-88.ec2.internal    <none>           <none>
+ebs-csi-node-m2bsx                         3/3     Running   0          4m28s   10.0.125.19    ip-10-0-103-193.ec2.internal   <none>           <none>
+ebs-csi-node-md7lg                         3/3     Running   0          4m28s   10.0.191.167   ip-10-0-182-86.ec2.internal    <none>           <none>
+ebs-csi-node-pmsvm                         3/3     Running   0          4m28s   10.0.127.242   ip-10-0-112-81.ec2.internal    <none>           <none>
+ebs-csi-node-qtrpf                         3/3     Running   0          4m28s   10.0.149.189   ip-10-0-153-52.ec2.internal    <none>           <none>
+ebs-csi-node-w58xm                         3/3     Running   0          4m28s   10.0.110.0     ip-10-0-127-213.ec2.internal   <none>           <none>
+ebs-csi-node-wlqv2                         3/3     Running   0          4m28s   10.0.128.194   ip-10-0-142-148.ec2.internal   <none>           <none>
+ebs-csi-node-x7xsl                         3/3     Running   0          4m28s   10.0.114.42    ip-10-0-111-58.ec2.internal    <none>           <none>
+tidb-controller-manager-65f65bd6d5-f27rg   1/1     Running   0          4m20s   10.0.126.143   ip-10-0-103-193.ec2.internal   <none>           <none>
+tidb-scheduler-66cf6f7f56-d4m6j            2/2     Running   0          4m20s   10.0.127.180   ip-10-0-103-193.ec2.internal   <none>           <none>
 ... other pods ...
 ```
 Verify the `gp3` EBS StorageClass is ready.
 ```
 $ kubectl -n kube-system get sc
 NAME            PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
-ebs-sc          ebs.csi.aws.com         Delete          WaitForFirstConsumer   true                   10m
+ebs-sc          ebs.csi.aws.com         Delete          WaitForFirstConsumer   true                   5m9s
 
 $ kubectl -n kube-system describe sc ebs-sc
 Name:            ebs-sc
@@ -209,70 +228,74 @@ Deploy the shared storage TiDB cluster by running `pulumi up`.
 $ pulumi up
 Updating (dev-us-east-1-f01)
 
-     Type                                               Name                                           Status           
-     pulumi:pulumi:Stack                                pulumi-shared-storage-tidb-dev-us-east-1-f01                    
-     ├─ eks:index:Cluster                               dev-us-east-1-f01-cluster                                       
- +   ├─ kubernetes:core/v1:Namespace                    dev-us-east-1-f01-serverless-ns                created (1s)     
- +   ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-1  created (2s)     
- +   ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster           created (4s)     
- +   └─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-2  created (4s)     
+     Type                                                   Name                                               Status            
+     pulumi:pulumi:Stack                                    pulumi-shared-storage-tidb-dev-us-east-1-f01                         
+     ├─ eks:index:Cluster                                   dev-us-east-1-f01-cluster                                            
+ +   ├─ kubernetes:core/v1:Namespace                        dev-us-east-1-f01-serverless-ns                    created (1s)      
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-1      created (5s)      
+ +   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-2       created (2s)      
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster               created (8s)      
+ +   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-1       created (4s)      
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-2      created (10s)     
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-2  created (3s)      
+ +   └─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-1  created (4s)      
 
 Outputs:
     kubeconfig   : { ... }
 
 Resources:
-    + 7 created
-    104 unchanged
+    + 13 created
+    125 unchanged
 
-Duration: 47s
+Duration: 1m1s
 ```
 The update takes ~1 minutes and will create the following resources on AWS:
 * A tidb-serverless namespace.
 * A shared PD cluster.
-* A shared TiKV Cluster.
+* A shared TiKV cluster.
 * An TiDB cluster as GC workers.
 * Two tenant TiDB cluster.
 
 View the Namespace status.
 ```
-$ kubectl get ns                                                               
+$ kubectl get ns
 NAME              STATUS   AGE
-default           Active   26m
-kube-node-lease   Active   26m
-kube-public       Active   26m
-kube-system       Active   26m
-tidb-serverless   Active   12m
+default           Active   25m
+kube-node-lease   Active   25m
+kube-public       Active   25m
+kube-system       Active   25m
+tidb-serverless   Active   5m
 ```
 View the Pod status in the tidb-serverless namespace.
 ```
 $ kubectl -n tidb-serverless get po -o wide -l app.kubernetes.io/component=pd
-NAME                      READY   STATUS    RESTARTS   AGE    IP            NODE                           NOMINATED NODE   READINESS GATES
-serverless-cluster-pd-0   1/1     Running   0          8m3s   10.0.216.44   ip-10-0-230-80.ec2.internal    <none>           <none>
-serverless-cluster-pd-1   1/1     Running   0          8m3s   10.0.23.224   ip-10-0-60-40.ec2.internal     <none>           <none>
-serverless-cluster-pd-2   1/1     Running   0          8m3s   10.0.203.51   ip-10-0-202-131.ec2.internal   <none>           <none>
+NAME                      READY   STATUS    RESTARTS        AGE     IP             NODE                           NOMINATED NODE   READINESS GATES
+serverless-cluster-pd-0   1/1     Running   1 (4m38s ago)   5m17s   10.0.116.74    ip-10-0-112-81.ec2.internal    <none>           <none>
+serverless-cluster-pd-1   1/1     Running   0               5m16s   10.0.171.108   ip-10-0-165-88.ec2.internal    <none>           <none>
+serverless-cluster-pd-2   1/1     Running   0               5m16s   10.0.137.224   ip-10-0-156-152.ec2.internal   <none>           <none>
 
 $ kubectl -n tidb-serverless get po -o wide -l app.kubernetes.io/component=tikv
-NAME                        READY   STATUS    RESTARTS   AGE   IP            NODE                         NOMINATED NODE   READINESS GATES
-serverless-cluster-tikv-0   1/1     Running   0          7m    10.0.90.139   ip-10-0-88-95.ec2.internal   <none>           <none>
-serverless-cluster-tikv-1   1/1     Running   0          7m    10.0.41.35    ip-10-0-3-111.ec2.internal   <none>           <none>
-serverless-cluster-tikv-2   1/1     Running   0          7m    10.0.65.81    ip-10-0-119-4.ec2.internal   <none>           <none>
+NAME                        READY   STATUS    RESTARTS   AGE     IP             NODE                           NOMINATED NODE   READINESS GATES
+serverless-cluster-tikv-0   1/1     Running   0          4m51s   10.0.112.51    ip-10-0-111-58.ec2.internal    <none>           <none>
+serverless-cluster-tikv-1   1/1     Running   0          4m50s   10.0.146.217   ip-10-0-153-52.ec2.internal    <none>           <none>
+serverless-cluster-tikv-2   1/1     Running   0          4m50s   10.0.178.240   ip-10-0-163-161.ec2.internal   <none>           <none>
 
 $ kubectl -n tidb-serverless get po -o wide -l app.kubernetes.io/component=tidb
-NAME                                 READY   STATUS    RESTARTS   AGE     IP             NODE                          NOMINATED NODE   READINESS GATES
-serverless-cluster-tidb-0            2/2     Running   0          6m42s   10.0.225.192   ip-10-0-254-64.ec2.internal   <none>           <none>
-serverless-cluster-tenant-1-tidb-0   2/2     Running   0          8m19s   10.0.223.170   ip-10-0-217-91.ec2.internal   <none>           <none>
-serverless-cluster-tenant-2-tidb-0   2/2     Running   0          8m19s   10.0.55.52     ip-10-0-0-246.ec2.internal    <none>           <none>
+NAME                                 READY   STATUS    RESTARTS   AGE     IP             NODE                           NOMINATED NODE   READINESS GATES
+serverless-cluster-tenant-1-tidb-0   2/2     Running   0          5m34s   10.0.124.45    ip-10-0-127-213.ec2.internal   <none>           <none>
+serverless-cluster-tenant-2-tidb-0   2/2     Running   0          5m32s   10.0.166.111   ip-10-0-182-86.ec2.internal    <none>           <none>
+serverless-cluster-tidb-0            2/2     Running   0          4m8s    10.0.105.44    ip-10-0-103-193.ec2.internal   <none>           <none>
 ```
 
 ### Use `kubectl port-forward` to access tenant TiDB service.
 * Get a list of TiDB services in the tidb-serverless namespace.
 ```
 $ kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb
-NAME                                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)              AGE
-serverless-cluster-tenant-1-tidb        ClusterIP   172.20.37.232   <none>        4000/TCP,10080/TCP   11m
-serverless-cluster-tenant-1-tidb-peer   ClusterIP   None            <none>        10080/TCP            11m
-serverless-cluster-tenant-2-tidb        ClusterIP   172.20.196.78   <none>        4000/TCP,10080/TCP   11m
-serverless-cluster-tenant-2-tidb-peer   ClusterIP   None            <none>        10080/TCP            11m
+NAME                                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)              AGE
+serverless-cluster-tenant-1-tidb        ClusterIP   172.20.223.105   <none>        4000/TCP,10080/TCP   6m40s
+serverless-cluster-tenant-1-tidb-peer   ClusterIP   None             <none>        10080/TCP            6m40s
+serverless-cluster-tenant-2-tidb        ClusterIP   172.20.196.108   <none>        4000/TCP,10080/TCP   6m38s
+serverless-cluster-tenant-2-tidb-peer   ClusterIP   None             <none>        10080/TCP            6m38s
 ```
 * Forward tenant TiDB port from the local host to the k8s cluster.
 ```
@@ -288,7 +311,7 @@ $ export PORT_TENANT_1=14001
 $ export PORT_TENANT_2=14002
 ```
 
-### Expose tenant TiDB service over the internet(Optional).
+### Expose tenant TiDB service over the internet (Optional).
 If you want to expose tenant TiDB service over the internet and if you are aware of the risks of doing this,
 you can set the following Pulumi configuration variables.
 ```
@@ -303,26 +326,27 @@ Updating (dev-us-east-1-f01)
      Type                                               Name                                           Status           Info
      pulumi:pulumi:Stack                                pulumi-shared-storage-tidb-dev-us-east-1-f01                    
      ├─ eks:index:Cluster                               dev-us-east-1-f01-cluster                                       
+     │  └─ aws:eks:Cluster                              dev-us-east-1-f01-cluster-eksCluster                            
      ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-1                   
- ~   │  └─ kubernetes:pingcap.com/v1alpha1:TidbCluster  tidb-serverless/serverless-cluster-tenant-1    updated (1s)     [diff: ~spec]
+ ~   │  └─ kubernetes:pingcap.com/v1alpha1:TidbCluster  tidb-serverless/serverless-cluster-tenant-1    updated (2s)     [diff: ~spec]
      └─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-2                   
- ~      └─ kubernetes:pingcap.com/v1alpha1:TidbCluster  tidb-serverless/serverless-cluster-tenant-2    updated (2s)     [diff: ~spec]
+ ~      └─ kubernetes:pingcap.com/v1alpha1:TidbCluster  tidb-serverless/serverless-cluster-tenant-2    updated (4s)     [diff: ~spec]
 
 Outputs:
     kubeconfig   : { ... }
 
 Resources:
     ~ 2 updated
-    115 unchanged
+    136 unchanged
 
-Duration: 41s
+Duration: 53s
 ```
 * Get a list of TiDB services in the tidb-serverless namespace.
 ```
-$  kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep -v "<none>"
+$ kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep -v "<none>"
 NAME                                    TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)                          AGE
-serverless-cluster-tenant-1-tidb        LoadBalancer   172.20.89.2      a1c8454fb86394982b9db853fb80a9db-1883777515.us-east-1.elb.amazonaws.com   4000:32585/TCP,10080:31425/TCP   11m
-serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.44.158    ab039dc44805a43e3bb1daeb939e07d3-1382204841.us-east-1.elb.amazonaws.com   4000:32472/TCP,10080:32490/TCP   11m
+serverless-cluster-tenant-1-tidb        LoadBalancer   172.20.223.105   a9d2df18da8764b349454447f1xxxxxx-1568000000.us-east-1.elb.amazonaws.com   4000:30556/TCP,10080:32276/TCP   11m
+serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.196.108   a515a70030d5746d4808e6221fxxxxxx-1632000000.us-east-1.elb.amazonaws.com   4000:32728/TCP,10080:31723/TCP   11m
 ```
 * Export the variable of the tenant TiDB service.
 ```
@@ -372,13 +396,16 @@ $ kill 10001 10002
 ```
 $ kubectl -n tidb-serverless get tc
 NAME                          READY   PD                  STORAGE   READY   DESIRE   TIKV                  STORAGE   READY   DESIRE   TIDB                  READY   DESIRE   AGE
-serverless-cluster            True    pingcap/pd:v7.1.0   10Gi      3       3        pingcap/tikv:v7.1.0   10Gi      3       3        pingcap/tidb:v7.1.0   1       1        24m
-serverless-cluster-tenant-1   True                                                                                                    pingcap/tidb:v7.1.0   1       1        24m
-serverless-cluster-tenant-2   True                                                                                                    pingcap/tidb:v7.1.0   1       1        24m
+serverless-cluster            True    pingcap/pd:v7.1.0   10Gi      3       3        pingcap/tikv:v7.1.0   10Gi      3       3        pingcap/tidb:v7.1.0   1       1        18m
+serverless-cluster-tenant-1   True                                                                                                    pingcap/tidb:v7.1.0   1       1        18m
+serverless-cluster-tenant-2   True                                                                                                    pingcap/tidb:v7.1.0   1       1        18m                                                                                                pingcap/tidb:v7.1.0   1       1        24m
 ```
-* Delete these `tc`.
+* Delete these `tc` manually.
 ```
 $ kubectl -n tidb-serverless delete tc --all
+tidbcluster.pingcap.com "serverless-cluster" deleted
+tidbcluster.pingcap.com "serverless-cluster-tenant-1" deleted
+tidbcluster.pingcap.com "serverless-cluster-tenant-2" deleted
 ```
 Set the Pulumi configuration variables to destroy the shared storage TiDB cluster.
 ```
@@ -393,22 +420,28 @@ Destroy the shared storage TiDB cluster by running `pulumi up`.
 $ pulumi up
 Updating (dev-us-east-1-f01)
 
-     Type                                               Name                                           Status            
-     pulumi:pulumi:Stack                                pulumi-shared-storage-tidb-dev-us-east-1-f01                     
-     ├─ eks:index:Cluster                               dev-us-east-1-f01-cluster                                        
- -   ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster           deleted           
- -   ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-2  deleted           
- -   ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster-tenant-1  deleted           
- -   └─ kubernetes:core/v1:Namespace                    dev-us-east-1-f01-serverless-ns                deleted (13s)     
+     Type                                                   Name                                               Status            
+     pulumi:pulumi:Stack                                    pulumi-shared-storage-tidb-dev-us-east-1-f01                         
+     ├─ eks:index:Cluster                                   dev-us-east-1-f01-cluster                                            
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-1  deleted           
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-2  deleted           
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-1      deleted           
+ -   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-1       deleted (2s)      
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-2      deleted           
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster               deleted           
+ -   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-2       deleted (3s)      
+ -   └─ kubernetes:core/v1:Namespace                        dev-us-east-1-f01-serverless-ns                    deleted (15s)     
+
+
 
 Outputs:
     kubeconfig   : { ... }
 
 Resources:
-    - 7 deleted
-    104 unchanged
+    - 13 deleted
+    125 unchanged
 
-Duration: 51s
+Duration: 1m9s
 ```
 
 ### Destroying Control Plane
@@ -424,20 +457,21 @@ Updating (dev-us-east-1-f01)
      Type                                                               Name                                          Status              
      pulumi:pulumi:Stack                                                pulumi-shared-storage-tidb-dev-us-east-1-f01                      
      ├─ eks:index:Cluster                                               dev-us-east-1-f01-cluster                                         
- -   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            deleted             
- -   ├─ kubernetes:helm.sh/v3:Release                                   tidb-operator                                 deleted (31s)       
- -   ├─ kubernetes:storage.k8s.io/v1:StorageClass                       ebs-sc                                        deleted (1s)        
+ -   ├─ kubernetes:storage.k8s.io/v1:StorageClass                       ebs-sc                                        deleted (2s)        
+ -   ├─ kubernetes:helm.sh/v3:Chart                                     aws-ebs-csi-driver                            deleted             
  -   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       deleted             
- -   └─ kubernetes:helm.sh/v3:Chart                                     aws-ebs-csi-driver                            deleted             
+ -   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            deleted             
+ -   └─ kubernetes:helm.sh/v3:Release                                   tidb-operator                                 deleted (19s)       
+
 
 Outputs:
     kubeconfig   : { ... }
 
 Resources:
     - 42 deleted
-    62 unchanged
+    83 unchanged
 
-Duration: 1m44s
+Duration: 1m46s
 ```
 ### Tidying up EKS Cluster
 Destroy all of its infrastructure with `pulumi destroy`.
@@ -447,26 +481,28 @@ Destroying (dev-us-east-1-f01)
 
      Type                                    Name                                                         Status             
  -   pulumi:pulumi:Stack                     pulumi-shared-storage-tidb-dev-us-east-1-f01                 deleted            
- -   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-pd-standard-0                              deleted            
- -   ├─ aws:iam:Role                         dev-us-east-1-f01-managed-nodegroup-role                     deleted (1s)       
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tidb-standard-0                            deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tikv-standard-0                            deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-tikv-standard-0                 deleted            
  -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-default-standard-0                         deleted            
+ -   ├─ aws:iam:Role                         dev-us-east-1-f01-managed-nodegroup-role                     deleted (1s)       
+ -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-pd-standard-0                   deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-pd-standard-0                   deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tidb-standard-0                            deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-tikv-standard-0                 deleted            
+ -   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-pd-standard-0                   deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-tikv-standard-0                 deleted            
  -   └─ eks:index:Cluster                    dev-us-east-1-f01-cluster                                    deleted            
 
 Outputs:
     kubeconfig   : { ... }
 
 Resources:
-    - 62 deleted
+    - 83 deleted
 
-Duration: 8m7s
-
-The resources in the stack have been deleted, but the history and configuration associated with the stack are still maintained. 
-If you want to remove the stack completely, run `pulumi stack rm dev-us-east-1-f01`.
+Duration: 7m56s
 ```
-Remove the stack completely
+The resources in the stack have been deleted, but the history and configuration associated with the stack are still maintained.
+If you want to remove the stack completely, run `pulumi stack rm dev-us-east-1-f01`.
 ```
 pulumi stack rm dev-us-east-1-f01
 ```
