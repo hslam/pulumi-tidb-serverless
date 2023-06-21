@@ -24,10 +24,10 @@ spec:
                 app.kubernetes.io/component: pd
             topologyKey: kubernetes.io/hostname
     nodeSelector:
-      serverless.tidbcloud.com/node: pd
+      serverless: pd
     tolerations:
       - effect: NoSchedule
-        key: serverless.tidbcloud.com/node
+        key: serverless
         operator: Equal
         value: pd
     baseImage: pingcap/pd
@@ -43,6 +43,7 @@ spec:
       internal-proxy = true
       [replication]
       enable-placement-rules = true
+      isolation-level = "topology.kubernetes.io/zone",
       location-labels = ["topology.kubernetes.io/region", "topology.kubernetes.io/zone", "kubernetes.io/hostname"]
       max-replicas = 3
       [keyspace]
@@ -56,10 +57,10 @@ spec:
                 app.kubernetes.io/component: tikv
             topologyKey: kubernetes.io/hostname
     nodeSelector:
-      serverless.tidbcloud.com/node: tikv
+      serverless: tikv
     tolerations:
       - effect: NoSchedule
-        key: serverless.tidbcloud.com/node
+        key: serverless
         operator: Equal
         value: tikv
     baseImage: pingcap/tikv
@@ -84,10 +85,10 @@ spec:
                 app.kubernetes.io/component: tidb
             topologyKey: kubernetes.io/hostname
     nodeSelector:
-      serverless.tidbcloud.com/node: tidb
+      serverless: tidb
     tolerations:
       - effect: NoSchedule
-        key: serverless.tidbcloud.com/node
+        key: serverless
         operator: Equal
         value: tidb
     baseImage: pingcap/tidb

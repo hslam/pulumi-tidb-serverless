@@ -101,13 +101,13 @@ export function createManagedNodeGroup(
             component: `${args.options.category}/${args.options.component}`,
         },
         labels: {
-            ["serverless.tidbcloud.com/node"]: args.options.component,
+            ["serverless"]: args.options.component,
         },
     };
     if (args.options.exclusive) {
         managedNodeGroupOptions.taints = [
             {
-                key: "serverless.tidbcloud.com/node",
+                key: "serverless",
                 value: args.options.component,
                 effect: "NO_SCHEDULE",
             },

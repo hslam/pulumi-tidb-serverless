@@ -72,44 +72,44 @@ Once the update is complete, verify the cluster, node groups, and Pods are up an
 ```
 $ pulumi stack output kubeconfig > kubeconfig.yml && export KUBECONFIG=$PWD/kubeconfig.yml
 
-$ kubectl get nodes -l serverless.tidbcloud.com/node=default
+$ kubectl get nodes -l serverless=default
 NAME                           STATUS   ROLES    AGE     VERSION
 ip-10-0-103-193.ec2.internal   Ready    <none>   4m53s   v1.26.4-eks-0a21954
 ip-10-0-142-148.ec2.internal   Ready    <none>   5m11s   v1.26.4-eks-0a21954
 
-$ kubectl get nodes -l serverless.tidbcloud.com/node=pd
+$ kubectl get nodes -l serverless=pd
 NAME                           STATUS   ROLES    AGE     VERSION
 ip-10-0-112-81.ec2.internal    Ready    <none>   4m55s   v1.26.4-eks-0a21954
 ip-10-0-156-152.ec2.internal   Ready    <none>   5m37s   v1.26.4-eks-0a21954
 ip-10-0-165-88.ec2.internal    Ready    <none>   5m13s   v1.26.4-eks-0a21954
 
-$ kubectl get nodes -l serverless.tidbcloud.com/node=tikv
+$ kubectl get nodes -l serverless=tikv
 NAME                           STATUS   ROLES    AGE     VERSION
 ip-10-0-111-58.ec2.internal    Ready    <none>   5m13s   v1.26.4-eks-0a21954
 ip-10-0-153-52.ec2.internal    Ready    <none>   5m10s   v1.26.4-eks-0a21954
 ip-10-0-163-161.ec2.internal   Ready    <none>   5m41s   v1.26.4-eks-0a21954
 
-$ kubectl get nodes -l serverless.tidbcloud.com/node=tidb
+$ kubectl get nodes -l serverless=tidb
 NAME                           STATUS   ROLES    AGE     VERSION
 ip-10-0-127-213.ec2.internal   Ready    <none>   5m33s   v1.26.4-eks-0a21954
 ip-10-0-182-86.ec2.internal    Ready    <none>   5m41s   v1.26.4-eks-0a21954
 
 
-$ kubectl label --list nodes -l serverless.tidbcloud.com/node=default | grep "topology.kubernetes.io/zone"
+$ kubectl label --list nodes -l serverless=default | grep "topology.kubernetes.io/zone"
  topology.kubernetes.io/zone=us-east-1a
  topology.kubernetes.io/zone=us-east-1b
 
-$ kubectl label --list nodes -l serverless.tidbcloud.com/node=pd | grep "topology.kubernetes.io/zone"
- topology.kubernetes.io/zone=us-east-1a
- topology.kubernetes.io/zone=us-east-1b
- topology.kubernetes.io/zone=us-east-1c
-
-$ kubectl label --list nodes -l serverless.tidbcloud.com/node=tikv | grep "topology.kubernetes.io/zone"
+$ kubectl label --list nodes -l serverless=pd | grep "topology.kubernetes.io/zone"
  topology.kubernetes.io/zone=us-east-1a
  topology.kubernetes.io/zone=us-east-1b
  topology.kubernetes.io/zone=us-east-1c
 
-$ kubectl label --list nodes -l serverless.tidbcloud.com/node=tidb | grep "topology.kubernetes.io/zone"
+$ kubectl label --list nodes -l serverless=tikv | grep "topology.kubernetes.io/zone"
+ topology.kubernetes.io/zone=us-east-1a
+ topology.kubernetes.io/zone=us-east-1b
+ topology.kubernetes.io/zone=us-east-1c
+
+$ kubectl label --list nodes -l serverless=tidb | grep "topology.kubernetes.io/zone"
  topology.kubernetes.io/zone=us-east-1a
  topology.kubernetes.io/zone=us-east-1c
 
@@ -432,8 +432,6 @@ Updating (dev-us-east-1-f01)
  -   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-2       deleted (3s)      
  -   └─ kubernetes:core/v1:Namespace                        dev-us-east-1-f01-serverless-ns                    deleted (15s)     
 
-
-
 Outputs:
     kubeconfig   : { ... }
 
@@ -462,7 +460,6 @@ Updating (dev-us-east-1-f01)
  -   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       deleted             
  -   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            deleted             
  -   └─ kubernetes:helm.sh/v3:Release                                   tidb-operator                                 deleted (19s)       
-
 
 Outputs:
     kubeconfig   : { ... }
