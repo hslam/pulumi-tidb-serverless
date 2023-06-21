@@ -32,15 +32,20 @@ Create the EKS cluster by running `pulumi up`.
 $ pulumi up
 Updating (dev-us-east-1-f01)
 
-     Type                                    Name                                                         Status              
- +   pulumi:pulumi:Stack                     pulumi-shared-storage-tidb-dev-us-east-1-f01                 created (704s)      
- +   ├─ eks:index:Cluster                    dev-us-east-1-f01-cluster                                    created (702s)      
- +   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        created (2s)        
+     Type                                    Name                                                         Status        
+ +   pulumi:pulumi:Stack                     pulumi-shared-storage-tidb-dev-us-east-1-f01                 created (788s) 
+ +   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        created (2s)  
+ +   ├─ eks:index:Cluster                    dev-us-east-1-f01-cluster                                    created (784s)      
  +   ├─ aws:iam:Role                         dev-us-east-1-f01-managed-nodegroup-role                     created (2s)        
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tidb-standard-0                            created (3s)        
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-default-standard-0                         created (6s)        
- +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tikv-standard-0                            created (5s)        
- +   └─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-pd-standard-0                              created (7s)        
+ +   ├─ aws:iam:InstanceProfile              dev-us-east-1-f01-instance-profile                           created (2s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-default-standard-0                         created (7s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tidb-standard-0                            created (9s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-pd-standard-0                   created (6s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-pd-standard-0                   created (10s)       
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-pd-standard-0                   created (8s)        
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-tikv-standard-0                 created (10s)       
+ +   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-tikv-standard-0                 created (3s)        
+ +   └─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-tikv-standard-0                 created (9s)        
 
 Outputs:
     kubeconfig   : {
@@ -53,15 +58,16 @@ Outputs:
     }
 
 Resources:
-    + 62 created
+    + 83 created
 
-Duration: 14m21s
+Duration: 15m54s
 ```
-The update takes 10-20 minutes and will create the following resources on AWS:
-* A VPC in the region, with public & private subnets across the region's 2 availability zones.
+The update takes 15-20 minutes and will create the following resources on AWS:
+* A VPC in the region, with public & private subnets across the region's 3 availability zones.
 * The IAM Role for node group.
 * An EKS cluster with v1.26 of Kubernetes.
-* Four different managed node groups for default, pd, tikv, tidb.
+* Create an ASG across multiple AZs for each component `default, tidb`.
+* Create multiple ASGs for each component `pd, tikv` with one ASG per AZ.
 
 Once the update is complete, verify the cluster, node groups, and Pods are up and running:
 ```
@@ -325,8 +331,8 @@ serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.44.158    ab039dc4
 $ export HOST_TENANT_1=`kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep -v "<none>" | grep tenant-1 |awk '{print $4}'`
 $ export HOST_TENANT_2=`kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep -v "<none>" | grep tenant-2 |awk '{print $4}'`
 
-$ export PORT_TENANT_1="4000"
-$ export PORT_TENANT_2="4000"
+$ export PORT_TENANT_1=4000
+$ export PORT_TENANT_2=4000
 ```
 
 ### Access the database.

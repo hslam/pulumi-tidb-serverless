@@ -6,32 +6,33 @@ import * as eks from "@pulumi/eks";
 import * as pulumi from "@pulumi/pulumi";
 
 const config = new pulumi.Config();
-const amiId = config.require("nodegroup-default-ami-id");
 
 export interface NodeGroupOptions {
     component: string;
     tier: string;
     version: number;
-    ami: string;
     category: string;
     instanceTypes: string [];
     capacityType: string;
     min: number;
     max: number;
+    maxUnavailable: number;
     exclusive: boolean;
+    multipleASGs: boolean;
 }
 
 const defaultNodeGroupOptions: NodeGroupOptions = {
     component: "default",
     tier: "standard",
     version: 0,
-    ami: amiId,
     category: "control-plane",
     instanceTypes: ["t2.medium"],
     capacityType: "ON_DEMAND",
     min: 0,
     max: 100,
+    maxUnavailable: 1,
     exclusive: true,
+    multipleASGs: false,
 };
 
 export function nodeGroupName(options: NodeGroupOptions): string {
@@ -51,14 +52,27 @@ export function loadNodeGroupOptionsList(): NodeGroupOptions[] {
     return list;
 }
 
+export function availabilityZoneSizeList(size: number, numberOfAvailabilityZones: number): number[] {
+    var azSizeList: number[] = new Array(numberOfAvailabilityZones)
+    for (let i = 0; i < azSizeList.length; i++) {
+        azSizeList[i] = size / numberOfAvailabilityZones
+    }
+    if (size % numberOfAvailabilityZones > 0) {
+        for (let i = 0; i < size % numberOfAvailabilityZones; i++) {
+            azSizeList[i] += 1
+        }
+    }
+    return azSizeList;
+}
+
 // Creates an EKS ManagedNodeGroup.
 interface ManagedNodeGroupArgs {
     options: NodeGroupOptions;
     env: string;
-    role: aws.iam.Role;
-    cluster: eks.Cluster;
     prefix: string;
-    maxUnavailable: number;
+    role: aws.iam.Role;
+    subnetIds: pulumi.Input<pulumi.Input<string>[]>;
+    cluster: eks.Cluster;
 }
 
 export function createManagedNodeGroup(
@@ -67,6 +81,8 @@ export function createManagedNodeGroup(
 ): eks.ManagedNodeGroup {
     let managedNodeGroupOptions: eks.ManagedNodeGroupOptions = {
         cluster: args.cluster,
+        subnetIds: args.subnetIds,
+        nodeRole: args.role,
         capacityType: args.options.capacityType,
         scalingConfig: {
             maxSize: args.options.max,
@@ -74,9 +90,8 @@ export function createManagedNodeGroup(
             minSize: args.options.min,
         },
         instanceTypes: args.options.instanceTypes,
-        nodeRole: args.role,
         updateConfig: {
-            maxUnavailable: args.maxUnavailable,
+            maxUnavailable: args.options.maxUnavailable,
         },
         tags: {
             "tidbcloud.com/env": `${args.env}`,

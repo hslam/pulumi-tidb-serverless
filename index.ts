@@ -19,9 +19,11 @@ export const suffix = config.require("cluster-suffix");
 export const prefix = `${env}-${region}-${suffix}`;
 export const cidrBlock = config.require("cluster-cidr-block");
 const k8sVersion = config.require("cluster-k8s-version");
+const numberOfAvailabilityZones = config.getNumber("cluster-availability-zones") || 3;
 
 // Allocate a new VPC with custom settings, and a public & private subnet per AZ.
 const vpc = new awsx.ec2.Vpc(`${prefix}-vpc`, {
+    numberOfAvailabilityZones: numberOfAvailabilityZones,
     cidrBlock: cidrBlock,
     subnets: [{type: "public"}, {type: "private"}],
 });
@@ -29,7 +31,9 @@ const vpc = new awsx.ec2.Vpc(`${prefix}-vpc`, {
 // Export VPC ID and Subnets.
 export const vpcId = vpc.id;
 export const allVpcSubnets = pulumi.all([vpc.privateSubnetIds, vpc.publicSubnetIds])
-    .apply(([privateSubnetIds, publicSubnetIds]) => privateSubnetIds.concat(publicSubnetIds));
+    .apply(([privateSubnetIds, publicSubnetIds]) => privateSubnetIds.concat(publicSubnetIds).sort((a, b) => (a > b ? -1 : 1)));
+export const privateSubnetIds = pulumi.all([vpc.privateSubnetIds])
+    .apply(([privateSubnetIds]) => privateSubnetIds.sort((a, b) => (a > b ? -1 : 1)));
 
 // Create a IAM Roles and matching InstanceProfile to use with the nodegroups.
 const managedASGRole = iam.createRole(`${prefix}-managed-nodegroup-role`);
@@ -57,16 +61,47 @@ export const kubeconfig = cluster.kubeconfig;
 
 const nodeGroups: eks.ManagedNodeGroup[] = [];
 for (const options of asg.loadNodeGroupOptionsList()) {
-    // Create a managed node group with the options.
-    const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
-        options: options,
-        env: env,
-        role: managedASGRole,
-        cluster: cluster,
-        prefix: prefix,
-        maxUnavailable: 1,
-    });
-    nodeGroups.push(nodeGroup);
+    if (options.multipleASGs) {
+        privateSubnetIds.apply((privateSubnetIds) => {
+            const azMinSizeList = asg.availabilityZoneSizeList(options.min, numberOfAvailabilityZones)
+            const azMaxSizeList = asg.availabilityZoneSizeList(options.max, numberOfAvailabilityZones)
+            for (let i = 0; i < privateSubnetIds.length; i++) {
+                const minSize = azMinSizeList[i]
+                if (minSize <= 0) {
+                    continue
+                }
+                options.min = minSize
+                options.max = azMaxSizeList[i]
+                const subnetId = privateSubnetIds[i]
+                aws.ec2.getSubnet({id: subnetId}).then((subnet) => {
+                    const availabilityZone = subnet.availabilityZone;
+                    let subnetIds: pulumi.Input<string>[] = [subnetId];
+                    // Create a managed node group in a specific AZ.
+                    const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${availabilityZone}-${asg.nodeGroupName(options)}`, {
+                        options: options,
+                        env: env,
+                        prefix: prefix,
+                        role: managedASGRole,
+                        subnetIds: subnetIds,
+                        cluster: cluster,
+                    });
+                    nodeGroups.push(nodeGroup);
+                });
+
+            }
+        });
+    } else {
+        // Create a managed node group across multiple AZs.
+        const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${asg.nodeGroupName(options)}`, {
+            options: options,
+            env: env,
+            prefix: prefix,
+            role: managedASGRole,
+            subnetIds: privateSubnetIds,
+            cluster: cluster,
+        });
+        nodeGroups.push(nodeGroup);
+    }
 }
 
 if (config.getObject("cluster-autoscaler-enabled") || false) {
