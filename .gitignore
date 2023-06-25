@@ -11,6 +11,7 @@ include/
 lib/
 yarn.lock
 package-lock.json
+Pulumi.*.yaml
 .idea/
 .ionide/
 *.iml
