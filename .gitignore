@@ -24,6 +24,8 @@ kubeconfig.yml
 .cache
 .DS_Store
 **/.DS_Store
+rsa
+rsa.pub
 
 # Java app
 .gradle/

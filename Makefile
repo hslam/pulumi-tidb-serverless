@@ -2,7 +2,7 @@ ENV ?= dev
 REGION ?= us-east-1
 SUFFIX ?= f01
 
-.Phony: install init rm
+.Phony: install init clean
 
 default: install
 
@@ -13,9 +13,9 @@ init:
 	cp config.yaml Pulumi.${ENV}-${REGION}-${SUFFIX}.yaml
 	pulumi stack init ${ENV}-${REGION}-${SUFFIX}
 	pulumi config set aws:region ${REGION}
-	pulumi config set pulumi-shared-storage-tidb:cluster-env ${ENV}
-	pulumi config set pulumi-shared-storage-tidb:cluster-region ${REGION}
-	pulumi config set pulumi-shared-storage-tidb:cluster-suffix ${SUFFIX}
+	pulumi config set cluster-env ${ENV}
+	pulumi config set cluster-region ${REGION}
+	pulumi config set cluster-suffix ${SUFFIX}
 
-rm:
+clean:
 	pulumi stack rm ${ENV}-${REGION}-${SUFFIX}

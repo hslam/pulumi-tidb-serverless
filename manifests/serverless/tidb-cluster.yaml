@@ -13,6 +13,8 @@ spec:
   enableDynamicConfiguration: true
   configUpdateStrategy: RollingUpdate
   discovery: {}
+  suspendAction:
+    suspendStatefulSet: false
   helper:
     image: alpine:3.16.0
   pd:
@@ -102,6 +104,10 @@ spec:
       cpu: 2000m
       memory: 1Gi
     service:
-      type: ClusterIP
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: nlb
+        service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+      type: LoadBalancer
+      externalTrafficPolicy: Local
     config: |
       keyspace-name = {{KeyspaceName}}

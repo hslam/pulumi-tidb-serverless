@@ -217,6 +217,9 @@ export function InstallEBSSC(c: eks.Cluster, driver: k8s.helm.v3.Chart) {
             mountOptions: ["nodelalloc", "noatime"],
             parameters: {
                 type: "gp3",
+                fsType: "ext4",
+                iops: "4000",
+                throughput: "400",
             },
         },
         {deleteBeforeReplace: true, provider: c.provider, dependsOn: driver.ready}

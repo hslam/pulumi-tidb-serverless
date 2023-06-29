@@ -8,6 +8,7 @@ const config = new pulumi.Config();
 
 const nsName = config.get<string>("serverless-namespace") || "tidb-serverless";
 const tidbOperatorTag = config.get<string>("tidb-operator-tag") || "v1.4.4";
+const suspend = config.getBoolean("serverless-suspend") || false;
 const keyspaces = config.getObject<Keyspace[]>(`serverless-keyspaces`) || [];
 const pdReplicas = config.getNumber("serverless-pd-replicas") || 1;
 const pdVersion = config.get<string>("serverless-pd-version") || "v7.1.0";
@@ -22,14 +23,14 @@ interface Keyspace {
     name: string;
     tidbReplicas: number;
     rootPassword: string;
-    externalIP: boolean;
+    internet: boolean;
 }
 
 const defaultKeyspace: Keyspace = {
     name: "",
     tidbReplicas: 0,
     rootPassword: "",
-    externalIP: false,
+    internet: false,
 };
 
 // Install TiDB Operator.
@@ -197,6 +198,7 @@ function CreateTC(
                 withNamespace(ns),
                 withName(name),
                 withExternalCluster(externalName, externalNamespace),
+                withSuspend(suspend),
                 withTiDBClusterImage("pd", "pingcap/pd", pdVersion),
                 withTiDBClusterImage("tikv", "pingcap/tikv", tikvVersion),
                 withTiDBClusterImage("tidb", "pingcap/tidb", tidbVersion),
@@ -243,6 +245,13 @@ export function withExternalCluster(name: string, ns: string) {
         } else {
             obj.spec.cluster = null;
         }
+    };
+}
+
+
+export function withSuspend(suspend: boolean) {
+    return (obj: any, _opts: pulumi.CustomResourceOptions) => {
+        obj.spec.suspendAction.suspendStatefulSet = suspend;
     };
 }
 
@@ -305,13 +314,15 @@ function withTiDBClusterKeyspace(name: string, keyspace: Keyspace) {
             if (obj.spec.tidb != null) {
                 if (keyspace.name.length > 0) {
                     obj.spec.tidb.config = (obj.spec.tidb.config as string).replace("{{KeyspaceName}}", `"${keyspace.name}"`);
-                    if (keyspace.externalIP) {
-                        obj.spec.tidb.service.type = "LoadBalancer";
+                    if (keyspace.internet) {
+                        obj.spec.tidb.service.annotations["service.beta.kubernetes.io/aws-load-balancer-scheme"] = "internet-facing"
                     }
                 } else {
                     obj.spec.tidb.config = (obj.spec.tidb.config as string).replace("{{KeyspaceName}}", `""`);
                     obj.spec.tidb.nodeSelector = null;
                     obj.spec.tidb.tolerations = null;
+                    obj.spec.tidb.service.annotations = null;
+                    obj.spec.tidb.service.type = "NodePort"
                 }
             }
         }

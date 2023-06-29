@@ -1,5 +1,8 @@
 config:
   aws:region: us-east-1
+  pulumi-shared-storage-tidb:bastion-ami-id: "ami-0f7abd12e02335c8d"
+  pulumi-shared-storage-tidb:bastion-enabled: "false"
+  pulumi-shared-storage-tidb:bastion-instance-type: "t2.medium"
   pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.26.2"
   pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: "0.5"
   pulumi-shared-storage-tidb:cluster-availability-zones: "3"
@@ -16,7 +19,7 @@ config:
       exclusive: false
       instanceTypes: ["t2.medium"]
       max: 10
-      min: 2
+      min: 3
       multipleASGs: false
       tier: "standard"
       version: 0
@@ -49,18 +52,19 @@ config:
       version: 0
   pulumi-shared-storage-tidb:serverless-enabled: "false"
   pulumi-shared-storage-tidb:serverless-keyspaces:
-    - externalIP: false
+    - internet: false
       name: "tenant-1"
       rootPassword: ""
-      tidbReplicas: 1
-    - externalIP: false
+      tidbReplicas: 0
+    - internet: false
       name: "tenant-2"
       rootPassword: ""
-      tidbReplicas: 1
+      tidbReplicas: 0
   pulumi-shared-storage-tidb:serverless-namespace: tidb-serverless
   pulumi-shared-storage-tidb:serverless-pd-replicas: "3"
   pulumi-shared-storage-tidb:serverless-pd-storage-size: "10Gi"
   pulumi-shared-storage-tidb:serverless-pd-version: v7.1.0
+  pulumi-shared-storage-tidb:serverless-suspend: "false"
   pulumi-shared-storage-tidb:serverless-tidb-replicas: "1"
   pulumi-shared-storage-tidb:serverless-tidb-version: v7.1.0
   pulumi-shared-storage-tidb:serverless-tikv-replicas: "3"
