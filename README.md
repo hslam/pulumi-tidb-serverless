@@ -386,11 +386,7 @@ Install the MySQL client on the bastion host.
 ```
 $ sudo yum install mysql -y
 ```
-- Connect the client to the tenant TiDB cluster without password.
-```
-$ mysql --comments -h ${tidb-nlb-dnsname} -P 4000 -u root
-```
-- Connect the client to the tenant TiDB cluster with password.
+Connect the client to the tenant TiDB cluster. If there is the tenant password, enter the password. Otherwise, press `Enter` directly.
 ```
 $ mysql --comments -h ${tidb-nlb-dnsname} -P 4000 -u root -p
 Enter password:
@@ -410,73 +406,6 @@ $ export PORT_TENANT_2=4000
 Make sure you have operated one of the two access options above.
 
 Access the tenant TiDB service and create a table in the test database.
-- Access the database without password.
-```
-$ mysql --comments -h ${HOST_TENANT_1} -P ${PORT_TENANT_1} -u root
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 417
-Server version: 5.7.25-TiDB-v7.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
-
-Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> use test;
-Database changed
-mysql> show tables;
-Empty set (0.38 sec)
-
-mysql> create table if not exists `tenant_1_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));
-Query OK, 0 rows affected (0.58 sec)
-
-mysql> show tables;
-+----------------+
-| Tables_in_test |
-+----------------+
-| tenant_1_tbl   |
-+----------------+
-1 row in set (0.27 sec)
-
-mysql> exit
-Bye
-
-$ mysql --comments -h ${HOST_TENANT_2} -P ${PORT_TENANT_2} -u root
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 433
-Server version: 5.7.25-TiDB-v7.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
-
-Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> use test;
-Database changed
-mysql> show tables;
-Empty set (0.29 sec)
-
-mysql> create table if not exists `tenant_2_tbl` (`id` int unsigned auto_increment primary key, `column_name` varchar(100));
-Query OK, 0 rows affected (0.50 sec)
-
-mysql> show tables;
-+----------------+
-| Tables_in_test |
-+----------------+
-| tenant_2_tbl   |
-+----------------+
-1 row in set (0.42 sec)
-
-mysql> exit
-Bye
-```
-- Access the database with password.
 ```
 $ mysql --comments -h ${HOST_TENANT_1} -P ${PORT_TENANT_1} -u root -p
 Enter password: 
