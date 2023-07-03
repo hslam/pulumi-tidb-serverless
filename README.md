@@ -1,4 +1,4 @@
-# pulumi-shared-storage-tidb
+# pulumi-tidb-serverless
 Deploy a shared storage TiDB cluster on AWS using pulumi.
 
 ## Getting started
@@ -12,10 +12,10 @@ Deploy a shared storage TiDB cluster on AWS using pulumi.
 * [Install AWS IAM Authenticator for Kubernetes](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
 
 ### Initializing the Pulumi Project
-1. Start by cloning the [pulumi-shared-storage-tidb](https://github.com/hslam/pulumi-shared-storage-tidb) to your local machine.
+1. Start by cloning the [pulumi-tidb-serverless](https://github.com/hslam/pulumi-tidb-serverless) to your local machine.
 ```
-$ git clone https://github.com/hslam/pulumi-shared-storage-tidb.git
-$ cd pulumi-shared-storage-tidb
+$ git clone https://github.com/hslam/pulumi-tidb-serverless.git
+$ cd pulumi-tidb-serverless
 ```
 2. Install the dependencies.
 ```
@@ -43,7 +43,7 @@ $ pulumi up
 Updating (dev-us-east-1-f01)
 
      Type                                          Name                                                         Status              
- +   pulumi:pulumi:Stack                           pulumi-shared-storage-tidb-dev-us-east-1-f01                 created (779s)      
+ +   pulumi:pulumi:Stack                           pulumi-tidb-serverless-dev-us-east-1-f01                 created (779s)      
  +   ├─ eks:index:Cluster                          dev-us-east-1-f01-cluster                                    created (745s)      
  +   ├─ aws:iam:Role                               dev-us-east-1-f01-managed-nodegroup-role                     created (3s)        
  +   ├─ awsx:ec2:Vpc                               dev-us-east-1-f01-vpc                                        created (5s)        
@@ -165,7 +165,7 @@ $ pulumi up
 Updating (dev-us-east-1-f01)
 
      Type                                                               Name                                          Status              
-     pulumi:pulumi:Stack                                                pulumi-shared-storage-tidb-dev-us-east-1-f01                      
+     pulumi:pulumi:Stack                                                pulumi-tidb-serverless-dev-us-east-1-f01                      
      ├─ eks:index:Cluster                                               dev-us-east-1-f01-cluster                                         
  +   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            created (2s)        
  +   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       created (2s)        
@@ -254,7 +254,7 @@ $ pulumi up
 Updating (dev-us-east-1-f01)
 
      Type                                                   Name                                               Status              
-     pulumi:pulumi:Stack                                    pulumi-shared-storage-tidb-dev-us-east-1-f01                           
+     pulumi:pulumi:Stack                                    pulumi-tidb-serverless-dev-us-east-1-f01                           
      ├─ eks:index:Cluster                                   dev-us-east-1-f01-cluster                                              
  +   ├─ kubernetes:core/v1:Namespace                        dev-us-east-1-f01-serverless-ns                    created (0.77s)     
  +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-2      created (5s)        
@@ -360,7 +360,7 @@ $ pulumi up
 Updating (dev-us-east-1-f01)
 
      Type                      Name                                          Status            
-     pulumi:pulumi:Stack       pulumi-shared-storage-tidb-dev-us-east-1-f01                    
+     pulumi:pulumi:Stack       pulumi-tidb-serverless-dev-us-east-1-f01                    
  +   ├─ aws:ec2:KeyPair        dev-us-east-1-f01-bastion-key-pair            created (2s)      
  +   ├─ aws:ec2:SecurityGroup  dev-us-east-1-f01-bastion-security-group      created (6s)      
      ├─ eks:index:Cluster      dev-us-east-1-f01-cluster                                       
@@ -461,7 +461,7 @@ Bye
 ```
 
 ### Suspending Shared Storage TiDB Cluster
-If you are connecting to the bastion host, exit it and return to the previous local directory `pulumi-shared-storage-tidb` .
+If you are connecting to the bastion host, exit it and return to the previous local directory `pulumi-tidb-serverless` .
 ```
 [ec2-user@ip-10-0-171-43 ~]$ exit
 logout
@@ -479,7 +479,7 @@ $ pulumi up
 Updating (dev-us-east-1-f01)
 
      Type                                                   Name                                               Status              Info
-     pulumi:pulumi:Stack                                    pulumi-shared-storage-tidb-dev-us-east-1-f01                           
+     pulumi:pulumi:Stack                                    pulumi-tidb-serverless-dev-us-east-1-f01                           
      ├─ eks:index:Cluster                                   dev-us-east-1-f01-cluster                                              
      ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster                                   
  ~   │  └─ kubernetes:pingcap.com/v1alpha1:TidbCluster      tidb-serverless/serverless-cluster                 updated (0.82s)     [diff: ~spec]
@@ -521,7 +521,7 @@ $ pulumi up
 Updating (dev-us-east-1-f01)
 
      Type                                               Name                                          Status            
-     pulumi:pulumi:Stack                                pulumi-shared-storage-tidb-dev-us-east-1-f01                    
+     pulumi:pulumi:Stack                                pulumi-tidb-serverless-dev-us-east-1-f01                    
      ├─ eks:index:Cluster                               dev-us-east-1-f01-cluster                                       
  -   ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster          deleted           
  -   └─ kubernetes:core/v1:Namespace                    dev-us-east-1-f01-serverless-ns               deleted (14s)     
@@ -548,7 +548,7 @@ $ pulumi up
 Updating (dev-us-east-1-f01)
 
      Type                                                               Name                                          Status              
-     pulumi:pulumi:Stack                                                pulumi-shared-storage-tidb-dev-us-east-1-f01                      
+     pulumi:pulumi:Stack                                                pulumi-tidb-serverless-dev-us-east-1-f01                      
      ├─ eks:index:Cluster                                               dev-us-east-1-f01-cluster                                         
  -   ├─ kubernetes:storage.k8s.io/v1:StorageClass                       ebs-sc                                        deleted (2s)        
  -   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       deleted             
@@ -578,7 +578,7 @@ $ pulumi destroy
 Destroying (dev-us-east-1-f01)
 
      Type                                    Name                                                         Status             
- -   pulumi:pulumi:Stack                     pulumi-shared-storage-tidb-dev-us-east-1-f01                 deleted            
+ -   pulumi:pulumi:Stack                     pulumi-tidb-serverless-dev-us-east-1-f01                 deleted            
  -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-tikv-standard-0                 deleted            
  -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-default-standard-0                         deleted            
  -   ├─ aws:iam:Role                         dev-us-east-1-f01-managed-nodegroup-role                     deleted (1s)       
@@ -609,4 +609,4 @@ make clean
 This package is licensed under a MIT license (Copyright (c) 2023 Meng Huang)
 
 ## Author
-pulumi-shared-storage-tidb was written by Meng Huang.
+pulumi-tidb-serverless was written by Meng Huang.

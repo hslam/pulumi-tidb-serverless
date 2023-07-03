@@ -1,5 +1,5 @@
 {
-    "name": "pulumi-shared-storage-tidb",
+    "name": "pulumi-tidb-serverless",
     "main": "index.ts",
     "devDependencies": {
         "@types/node": "^16"

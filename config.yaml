@@ -1,18 +1,18 @@
 config:
   aws:region: us-east-1
-  pulumi-shared-storage-tidb:bastion-ami-id: "ami-0f7abd12e02335c8d"
-  pulumi-shared-storage-tidb:bastion-enabled: "false"
-  pulumi-shared-storage-tidb:bastion-instance-type: "t2.medium"
-  pulumi-shared-storage-tidb:cluster-autoscaler-ca-version: "v1.26.2"
-  pulumi-shared-storage-tidb:cluster-autoscaler-down-threshold: "0.5"
-  pulumi-shared-storage-tidb:cluster-availability-zones: "3"
-  pulumi-shared-storage-tidb:cluster-cidr-block: 10.0.0.0/16
-  pulumi-shared-storage-tidb:cluster-env: dev
-  pulumi-shared-storage-tidb:cluster-k8s-version: "1.26"
-  pulumi-shared-storage-tidb:cluster-region: us-east-1
-  pulumi-shared-storage-tidb:cluster-suffix: f01
-  pulumi-shared-storage-tidb:control-plane-enabled: "false"
-  pulumi-shared-storage-tidb:nodegroups:
+  pulumi-tidb-serverless:bastion-ami-id: "ami-0f7abd12e02335c8d"
+  pulumi-tidb-serverless:bastion-enabled: "false"
+  pulumi-tidb-serverless:bastion-instance-type: "t2.medium"
+  pulumi-tidb-serverless:cluster-autoscaler-ca-version: "v1.26.2"
+  pulumi-tidb-serverless:cluster-autoscaler-down-threshold: "0.5"
+  pulumi-tidb-serverless:cluster-availability-zones: "3"
+  pulumi-tidb-serverless:cluster-cidr-block: 10.0.0.0/16
+  pulumi-tidb-serverless:cluster-env: dev
+  pulumi-tidb-serverless:cluster-k8s-version: "1.26"
+  pulumi-tidb-serverless:cluster-region: us-east-1
+  pulumi-tidb-serverless:cluster-suffix: f01
+  pulumi-tidb-serverless:control-plane-enabled: "false"
+  pulumi-tidb-serverless:nodegroups:
     - capacityType: "SPOT"
       category: "control-plane"
       component: "default"
@@ -50,8 +50,8 @@ config:
       multipleASGs: false
       tier: "standard"
       version: 0
-  pulumi-shared-storage-tidb:serverless-enabled: "false"
-  pulumi-shared-storage-tidb:serverless-keyspaces:
+  pulumi-tidb-serverless:serverless-enabled: "false"
+  pulumi-tidb-serverless:serverless-keyspaces:
     - internet: false
       name: "tenant-1"
       rootPassword: ""
@@ -60,14 +60,14 @@ config:
       name: "tenant-2"
       rootPassword: ""
       tidbReplicas: 0
-  pulumi-shared-storage-tidb:serverless-namespace: tidb-serverless
-  pulumi-shared-storage-tidb:serverless-pd-replicas: "3"
-  pulumi-shared-storage-tidb:serverless-pd-storage-size: "10Gi"
-  pulumi-shared-storage-tidb:serverless-pd-version: v7.1.0
-  pulumi-shared-storage-tidb:serverless-suspend: "false"
-  pulumi-shared-storage-tidb:serverless-tidb-replicas: "1"
-  pulumi-shared-storage-tidb:serverless-tidb-version: v7.1.0
-  pulumi-shared-storage-tidb:serverless-tikv-replicas: "3"
-  pulumi-shared-storage-tidb:serverless-tikv-storage-size: "10Gi"
-  pulumi-shared-storage-tidb:serverless-tikv-version: v7.1.0
-  pulumi-shared-storage-tidb:tidb-operator-tag: v1.4.4
+  pulumi-tidb-serverless:serverless-namespace: tidb-serverless
+  pulumi-tidb-serverless:serverless-pd-replicas: "3"
+  pulumi-tidb-serverless:serverless-pd-storage-size: "10Gi"
+  pulumi-tidb-serverless:serverless-pd-version: v7.1.0
+  pulumi-tidb-serverless:serverless-suspend: "false"
+  pulumi-tidb-serverless:serverless-tidb-replicas: "1"
+  pulumi-tidb-serverless:serverless-tidb-version: v7.1.0
+  pulumi-tidb-serverless:serverless-tikv-replicas: "3"
+  pulumi-tidb-serverless:serverless-tikv-storage-size: "10Gi"
+  pulumi-tidb-serverless:serverless-tikv-version: v7.1.0
+  pulumi-tidb-serverless:tidb-operator-tag: v1.4.4
