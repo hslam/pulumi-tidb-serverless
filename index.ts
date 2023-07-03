@@ -111,6 +111,9 @@ export const kubeconfig = cluster.kubeconfig;
 
 const nodeGroups: eks.ManagedNodeGroup[] = [];
 for (const options of asg.loadNodeGroupOptionsList()) {
+    if (options.min <= 0) {
+        continue
+    }
     if (options.multipleASGs) {
         privateSubnetIds.apply((privateSubnetIds) => {
             const azMinSizeList = asg.availabilityZoneSizeList(options.min, numberOfAvailabilityZones)
