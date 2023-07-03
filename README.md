@@ -319,7 +319,7 @@ serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.213.180   k8s-tidb
 ```
 You can select either `kubectl port-forward` or a bastion host from the following options to access the database.
 
-### Using `kubectl port-forward` to access the database (Optional)
+### (Optional) Using `kubectl port-forward` to access the database
 If you do not create a bastion host, you can use `kubectl port-forward` to access tenant TiDB service.
 
 Forward tenant TiDB port from the local host to the k8s cluster.
@@ -337,7 +337,7 @@ $ export PORT_TENANT_2=14002
 ```
 Install the MySQL client on your local machine.
 
-### Preparing a bastion host to access the database (Optional)
+### (Optional) Preparing a bastion host to access the database
 If you do not use `kubectl port-forward`, you can create a bastion host to access tenant TiDB service.
 
 Allow the bastion host to access the Internet. Select the correct key pair so that you can log in to the host via SSH.
