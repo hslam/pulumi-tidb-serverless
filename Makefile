@@ -1,5 +1,5 @@
 ENV ?= dev
-REGION ?= us-east-1
+REGION ?= ap-southeast-1
 SUFFIX ?= f01
 
 .Phony: install init clean

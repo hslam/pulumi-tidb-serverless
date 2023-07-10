@@ -24,7 +24,7 @@ $ make install
 3. Set environment variables for a new Pulumi stack.
 ```
 $ export ENV=dev
-$ export REGION=us-east-1
+$ export REGION=ap-southeast-1
 $ export SUFFIX=f01
 ```
 4. Create an empty Pulumi stack named `${ENV}-${REGION}-${SUFFIX}`.
@@ -40,21 +40,21 @@ $ pulumi stack select ${ENV}-${REGION}-${SUFFIX}
 Create the EKS cluster by running `pulumi up`.
 ```
 $ pulumi up
-Updating (dev-us-east-1-f01)
+Updating (dev-ap-southeast-1-f01)
 
      Type                                          Name                                                         Status              
- +   pulumi:pulumi:Stack                           pulumi-tidb-serverless-dev-us-east-1-f01                 created (779s)      
- +   ├─ eks:index:Cluster                          dev-us-east-1-f01-cluster                                    created (745s)      
- +   ├─ aws:iam:Role                               dev-us-east-1-f01-managed-nodegroup-role                     created (3s)        
- +   ├─ awsx:ec2:Vpc                               dev-us-east-1-f01-vpc                                        created (5s)        
- +   ├─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-us-east-1c-pd-standard-0                   created (3s)        
- +   ├─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-us-east-1a-tikv-standard-0                 created (6s)        
- +   ├─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-us-east-1b-tikv-standard-0                 created (6s)        
- +   ├─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-us-east-1b-pd-standard-0                   created (6s)        
- +   ├─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-default-standard-0                         created (7s)        
- +   ├─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-us-east-1c-tikv-standard-0                 created (7s)        
- +   ├─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-tidb-standard-0                            created (8s)        
- +   └─ eks:index:ManagedNodeGroup                 dev-us-east-1-f01-us-east-1a-pd-standard-0                   created (8s)        
+ +   pulumi:pulumi:Stack                           pulumi-tidb-serverless-dev-ap-southeast-1-f01                 created (779s)      
+ +   ├─ eks:index:Cluster                          dev-ap-southeast-1-f01-cluster                                    created (745s)      
+ +   ├─ aws:iam:Role                               dev-ap-southeast-1-f01-managed-nodegroup-role                     created (3s)        
+ +   ├─ awsx:ec2:Vpc                               dev-ap-southeast-1-f01-vpc                                        created (5s)        
+ +   ├─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-ap-southeast-1c-pd-standard-0                   created (3s)        
+ +   ├─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-ap-southeast-1a-tikv-standard-0                 created (6s)        
+ +   ├─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-ap-southeast-1b-tikv-standard-0                 created (6s)        
+ +   ├─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-ap-southeast-1b-pd-standard-0                   created (6s)        
+ +   ├─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-default-standard-0                         created (7s)        
+ +   ├─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-ap-southeast-1c-tikv-standard-0                 created (7s)        
+ +   ├─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-tidb-standard-0                            created (8s)        
+ +   └─ eks:index:ManagedNodeGroup                 dev-ap-southeast-1-f01-ap-southeast-1a-pd-standard-0                   created (8s)        
 
 Outputs:
     kubeconfig   : {
@@ -107,23 +107,23 @@ ip-10-0-26-233.ec2.internal   Ready    <none>   3m12s   v1.26.4-eks-0a21954
 
 
 $ kubectl label --list nodes -l serverless=default | grep "topology.kubernetes.io/zone"
- topology.kubernetes.io/zone=us-east-1c
- topology.kubernetes.io/zone=us-east-1a
- topology.kubernetes.io/zone=us-east-1b
+ topology.kubernetes.io/zone=ap-southeast-1c
+ topology.kubernetes.io/zone=ap-southeast-1a
+ topology.kubernetes.io/zone=ap-southeast-1b
 
 $ kubectl label --list nodes -l serverless=pd | grep "topology.kubernetes.io/zone"
- topology.kubernetes.io/zone=us-east-1a
- topology.kubernetes.io/zone=us-east-1c
- topology.kubernetes.io/zone=us-east-1b
+ topology.kubernetes.io/zone=ap-southeast-1a
+ topology.kubernetes.io/zone=ap-southeast-1c
+ topology.kubernetes.io/zone=ap-southeast-1b
 
 $ kubectl label --list nodes -l serverless=tikv | grep "topology.kubernetes.io/zone"
- topology.kubernetes.io/zone=us-east-1c
- topology.kubernetes.io/zone=us-east-1a
- topology.kubernetes.io/zone=us-east-1b
+ topology.kubernetes.io/zone=ap-southeast-1c
+ topology.kubernetes.io/zone=ap-southeast-1a
+ topology.kubernetes.io/zone=ap-southeast-1b
 
 $ kubectl label --list nodes -l serverless=tidb | grep "topology.kubernetes.io/zone"
- topology.kubernetes.io/zone=us-east-1c
- topology.kubernetes.io/zone=us-east-1a
+ topology.kubernetes.io/zone=ap-southeast-1c
+ topology.kubernetes.io/zone=ap-southeast-1a
 
 
 $ kubectl -n kube-system get po -o wide
@@ -162,11 +162,11 @@ $ pulumi config set control-plane-enabled true
 Deploy the control plane components by running `pulumi up`.
 ```
 $ pulumi up
-Updating (dev-us-east-1-f01)
+Updating (dev-ap-southeast-1-f01)
 
      Type                                                               Name                                          Status              
-     pulumi:pulumi:Stack                                                pulumi-tidb-serverless-dev-us-east-1-f01                      
-     ├─ eks:index:Cluster                                               dev-us-east-1-f01-cluster                                         
+     pulumi:pulumi:Stack                                                pulumi-tidb-serverless-dev-ap-southeast-1-f01                      
+     ├─ eks:index:Cluster                                               dev-ap-southeast-1-f01-cluster                                         
  +   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            created (2s)        
  +   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       created (2s)        
  +   ├─ kubernetes:helm.sh/v3:Release                                   aws-load-balancer-controller                  created (55s)       
@@ -251,19 +251,19 @@ $ pulumi config set serverless-enabled true
 Deploy the shared storage TiDB cluster by running `pulumi up`.
 ```
 $ pulumi up
-Updating (dev-us-east-1-f01)
+Updating (dev-ap-southeast-1-f01)
 
      Type                                                   Name                                               Status              
-     pulumi:pulumi:Stack                                    pulumi-tidb-serverless-dev-us-east-1-f01                           
-     ├─ eks:index:Cluster                                   dev-us-east-1-f01-cluster                                              
- +   ├─ kubernetes:core/v1:Namespace                        dev-us-east-1-f01-serverless-ns                    created (0.77s)     
- +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-2      created (5s)        
- +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-1      created (9s)        
- +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster               created (9s)        
- +   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-2       created (3s)        
- +   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-1       created (4s)        
- +   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-2  created (2s)        
- +   └─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-1  created (4s)        
+     pulumi:pulumi:Stack                                    pulumi-tidb-serverless-dev-ap-southeast-1-f01                           
+     ├─ eks:index:Cluster                                   dev-ap-southeast-1-f01-cluster                                              
+ +   ├─ kubernetes:core/v1:Namespace                        dev-ap-southeast-1-f01-serverless-ns                    created (0.77s)     
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-cluster-tenant-2      created (5s)        
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-cluster-tenant-1      created (9s)        
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-cluster               created (9s)        
+ +   ├─ kubernetes:core/v1:Secret                           dev-ap-southeast-1-f01-serverless-secret-tenant-2       created (3s)        
+ +   ├─ kubernetes:core/v1:Secret                           dev-ap-southeast-1-f01-serverless-secret-tenant-1       created (4s)        
+ +   ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-initializer-tenant-2  created (2s)        
+ +   └─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-initializer-tenant-1  created (4s)        
 
 Outputs:
     kubeconfig   : { ... }
@@ -314,8 +314,8 @@ serverless-cluster-tidb-0            2/2     Running   0          21s    10.0.7.
 Get tenant TiDB services in the tidb-serverless namespace.
 ```
 $ kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep LoadBalancer
-serverless-cluster-tenant-1-tidb        LoadBalancer   172.20.175.51    k8s-tidbserv-serverle-2e56d1dxxx-892c265c2ab1exxx.elb.us-east-1.amazonaws.com   4000:30429/TCP,10080:31032/TCP   2m26s
-serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.213.180   k8s-tidbserv-serverle-5b6b01axxx-36495fe2ad75dxxx.elb.us-east-1.amazonaws.com   4000:31325/TCP,10080:30186/TCP   2m26s
+serverless-cluster-tenant-1-tidb        LoadBalancer   172.20.175.51    k8s-tidbserv-serverle-2e56d1dxxx-892c265c2ab1exxx.elb.ap-southeast-1.amazonaws.com   4000:30429/TCP,10080:31032/TCP   2m26s
+serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.213.180   k8s-tidbserv-serverle-5b6b01axxx-36495fe2ad75dxxx.elb.ap-southeast-1.amazonaws.com   4000:31325/TCP,10080:30186/TCP   2m26s
 ```
 You can select either `kubectl port-forward` or a bastion host from the following options to access the database.
 
@@ -357,14 +357,14 @@ $ pulumi config set bastion-enabled true
 From there, you can run `pulumi up` and all bastion resources will be provisioned and configured.
 ```
 $ pulumi up
-Updating (dev-us-east-1-f01)
+Updating (dev-ap-southeast-1-f01)
 
      Type                      Name                                          Status            
-     pulumi:pulumi:Stack       pulumi-tidb-serverless-dev-us-east-1-f01                    
- +   ├─ aws:ec2:KeyPair        dev-us-east-1-f01-bastion-key-pair            created (2s)      
- +   ├─ aws:ec2:SecurityGroup  dev-us-east-1-f01-bastion-security-group      created (6s)      
-     ├─ eks:index:Cluster      dev-us-east-1-f01-cluster                                       
- +   └─ aws:ec2:Instance       dev-us-east-1-f01-bastion                     created (26s)     
+     pulumi:pulumi:Stack       pulumi-tidb-serverless-dev-ap-southeast-1-f01                    
+ +   ├─ aws:ec2:KeyPair        dev-ap-southeast-1-f01-bastion-key-pair            created (2s)      
+ +   ├─ aws:ec2:SecurityGroup  dev-ap-southeast-1-f01-bastion-security-group      created (6s)      
+     ├─ eks:index:Cluster      dev-ap-southeast-1-f01-cluster                                       
+ +   └─ aws:ec2:Instance       dev-ap-southeast-1-f01-bastion                     created (26s)     
 
 Outputs:
   + bastionHost     : "50.16.xx.xx"
@@ -395,8 +395,8 @@ Enter password:
 
 Set environment variables on the bastion host.
 ```
-$ export HOST_TENANT_1=k8s-tidbserv-serverle-2e56d1dxxx-892c265c2ab1exxx.elb.us-east-1.amazonaws.com
-$ export HOST_TENANT_2=k8s-tidbserv-serverle-5b6b01axxx-36495fe2ad75dxxx.elb.us-east-1.amazonaws.com
+$ export HOST_TENANT_1=k8s-tidbserv-serverle-2e56d1dxxx-892c265c2ab1exxx.elb.ap-southeast-1.amazonaws.com
+$ export HOST_TENANT_2=k8s-tidbserv-serverle-5b6b01axxx-36495fe2ad75dxxx.elb.ap-southeast-1.amazonaws.com
 
 $ export PORT_TENANT_1=4000
 $ export PORT_TENANT_2=4000
@@ -478,19 +478,19 @@ $ pulumi config set --path 'serverless-suspend' true
 Suspend the shared storage TiDB cluster by running `pulumi up`.
 ```
 $ pulumi up
-Updating (dev-us-east-1-f01)
+Updating (dev-ap-southeast-1-f01)
 
      Type                                                   Name                                               Status              Info
-     pulumi:pulumi:Stack                                    pulumi-tidb-serverless-dev-us-east-1-f01                           
-     ├─ eks:index:Cluster                                   dev-us-east-1-f01-cluster                                              
-     ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster                                   
+     pulumi:pulumi:Stack                                    pulumi-tidb-serverless-dev-ap-southeast-1-f01                           
+     ├─ eks:index:Cluster                                   dev-ap-southeast-1-f01-cluster                                              
+     ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-cluster                                   
  ~   │  └─ kubernetes:pingcap.com/v1alpha1:TidbCluster      tidb-serverless/serverless-cluster                 updated (0.82s)     [diff: ~spec]
- -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-2  deleted             
- -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-initializer-tenant-1  deleted             
- -   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-2       deleted (3s)        
- -   ├─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-2      deleted             
- -   ├─ kubernetes:core/v1:Secret                           dev-us-east-1-f01-serverless-secret-tenant-1       deleted (3s)        
- -   └─ kubernetes:yaml:ConfigFile                          dev-us-east-1-f01-serverless-cluster-tenant-1      deleted             
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-initializer-tenant-2  deleted             
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-initializer-tenant-1  deleted             
+ -   ├─ kubernetes:core/v1:Secret                           dev-ap-southeast-1-f01-serverless-secret-tenant-2       deleted (3s)        
+ -   ├─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-cluster-tenant-2      deleted             
+ -   ├─ kubernetes:core/v1:Secret                           dev-ap-southeast-1-f01-serverless-secret-tenant-1       deleted (3s)        
+ -   └─ kubernetes:yaml:ConfigFile                          dev-ap-southeast-1-f01-serverless-cluster-tenant-1      deleted             
 
 Outputs:
     bastionHost     : "50.16.xx.xx"
@@ -520,13 +520,13 @@ $ pulumi config set serverless-enabled false
 Destroy the shared storage TiDB cluster by running `pulumi up`.
 ```
 $ pulumi up
-Updating (dev-us-east-1-f01)
+Updating (dev-ap-southeast-1-f01)
 
      Type                                               Name                                          Status            
-     pulumi:pulumi:Stack                                pulumi-tidb-serverless-dev-us-east-1-f01                    
-     ├─ eks:index:Cluster                               dev-us-east-1-f01-cluster                                       
- -   ├─ kubernetes:yaml:ConfigFile                      dev-us-east-1-f01-serverless-cluster          deleted           
- -   └─ kubernetes:core/v1:Namespace                    dev-us-east-1-f01-serverless-ns               deleted (14s)     
+     pulumi:pulumi:Stack                                pulumi-tidb-serverless-dev-ap-southeast-1-f01                    
+     ├─ eks:index:Cluster                               dev-ap-southeast-1-f01-cluster                                       
+ -   ├─ kubernetes:yaml:ConfigFile                      dev-ap-southeast-1-f01-serverless-cluster          deleted           
+ -   └─ kubernetes:core/v1:Namespace                    dev-ap-southeast-1-f01-serverless-ns               deleted (14s)     
 
 Outputs:
     kubeconfig   : { ... }
@@ -547,20 +547,20 @@ $ pulumi config set control-plane-enabled false
 Destroy the control plane resources by running `pulumi up`.
 ```
 $ pulumi up
-Updating (dev-us-east-1-f01)
+Updating (dev-ap-southeast-1-f01)
 
      Type                                                               Name                                          Status              
-     pulumi:pulumi:Stack                                                pulumi-tidb-serverless-dev-us-east-1-f01                      
-     ├─ eks:index:Cluster                                               dev-us-east-1-f01-cluster                                         
+     pulumi:pulumi:Stack                                                pulumi-tidb-serverless-dev-ap-southeast-1-f01                      
+     ├─ eks:index:Cluster                                               dev-ap-southeast-1-f01-cluster                                         
  -   ├─ kubernetes:storage.k8s.io/v1:StorageClass                       ebs-sc                                        deleted (2s)        
  -   ├─ kubernetes:helm.sh/v3:Chart                                     aws-cluster-auto-scaler                       deleted             
  -   ├─ kubernetes:helm.sh/v3:Chart                                     aws-ebs-csi-driver                            deleted             
  -   ├─ kubernetes:helm.sh/v3:Release                                   aws-load-balancer-controller                  deleted (33s)       
- -   ├─ aws:ec2:Instance                                                dev-us-east-1-f01-bastion                     deleted (39s)       
+ -   ├─ aws:ec2:Instance                                                dev-ap-southeast-1-f01-bastion                     deleted (39s)       
  -   ├─ kubernetes:helm.sh/v3:Release                                   tidb-operator                                 deleted (23s)       
  -   ├─ kubernetes:yaml:ConfigFile                                      tidb-operator-crds                            deleted             
- -   ├─ aws:ec2:KeyPair                                                 dev-us-east-1-f01-bastion-key-pair            deleted (1s)        
- -   └─ aws:ec2:SecurityGroup                                           dev-us-east-1-f01-bastion-security-group      deleted (4s)        
+ -   ├─ aws:ec2:KeyPair                                                 dev-ap-southeast-1-f01-bastion-key-pair            deleted (1s)        
+ -   └─ aws:ec2:SecurityGroup                                           dev-ap-southeast-1-f01-bastion-security-group      deleted (4s)        
 
 Outputs:
   - bastionHost     : "50.16.xx.xx"
@@ -577,21 +577,21 @@ Duration: 2m36s
 Destroy all of its infrastructure with `pulumi destroy`.
 ```
 $ pulumi destroy
-Destroying (dev-us-east-1-f01)
+Destroying (dev-ap-southeast-1-f01)
 
      Type                                    Name                                                         Status             
- -   pulumi:pulumi:Stack                     pulumi-tidb-serverless-dev-us-east-1-f01                 deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-tikv-standard-0                 deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-default-standard-0                         deleted            
- -   ├─ aws:iam:Role                         dev-us-east-1-f01-managed-nodegroup-role                     deleted (1s)       
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-pd-standard-0                   deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1c-pd-standard-0                   deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-tidb-standard-0                            deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-tikv-standard-0                 deleted            
- -   ├─ awsx:x:ec2:Vpc                       dev-us-east-1-f01-vpc                                        deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1b-pd-standard-0                   deleted            
- -   ├─ eks:index:ManagedNodeGroup           dev-us-east-1-f01-us-east-1a-tikv-standard-0                 deleted            
- -   └─ eks:index:Cluster                    dev-us-east-1-f01-cluster                                    deleted            
+ -   pulumi:pulumi:Stack                     pulumi-tidb-serverless-dev-ap-southeast-1-f01                 deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-ap-southeast-1c-tikv-standard-0                 deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-default-standard-0                         deleted            
+ -   ├─ aws:iam:Role                         dev-ap-southeast-1-f01-managed-nodegroup-role                     deleted (1s)       
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-ap-southeast-1a-pd-standard-0                   deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-ap-southeast-1c-pd-standard-0                   deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-tidb-standard-0                            deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-ap-southeast-1b-tikv-standard-0                 deleted            
+ -   ├─ awsx:x:ec2:Vpc                       dev-ap-southeast-1-f01-vpc                                        deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-ap-southeast-1b-pd-standard-0                   deleted            
+ -   ├─ eks:index:ManagedNodeGroup           dev-ap-southeast-1-f01-ap-southeast-1a-tikv-standard-0                 deleted            
+ -   └─ eks:index:Cluster                    dev-ap-southeast-1-f01-cluster                                    deleted            
 
 Outputs:
   - kubeconfig      : { ... }
