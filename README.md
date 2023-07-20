@@ -21,7 +21,7 @@ $ cd pulumi-tidb-serverless
 ```
 $ make install
 ```
-1.3 Set environment variables for a new Pulumi stack.
+1.3 Set environment variables for a new Pulumi stack. ***Make sure the `SUFFIX` is your unique ID***
 ```
 $ export ENV=dev
 $ export REGION=ap-southeast-1
