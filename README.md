@@ -11,33 +11,33 @@ Deploy a shared storage TiDB cluster on AWS using pulumi.
 * [Configure AWS credentials](https://www.pulumi.com/registry/packages/aws/installation-configuration/)
 * [Install AWS IAM Authenticator for Kubernetes](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
 
-### Initializing the Pulumi Project
-1. Start by cloning the [pulumi-tidb-serverless](https://github.com/hslam/pulumi-tidb-serverless) to your local machine.
+### 1. Initializing the Pulumi Project
+1.1 Start by cloning the [pulumi-tidb-serverless](https://github.com/hslam/pulumi-tidb-serverless) to your local machine.
 ```
 $ git clone https://github.com/hslam/pulumi-tidb-serverless.git
 $ cd pulumi-tidb-serverless
 ```
-2. Install the dependencies.
+1.2 Install the dependencies.
 ```
 $ make install
 ```
-3. Set environment variables for a new Pulumi stack.
+1.3 Set environment variables for a new Pulumi stack.
 ```
 $ export ENV=dev
 $ export REGION=ap-southeast-1
 $ export SUFFIX=f01
 ```
-4. Create an empty Pulumi stack named `${ENV}-${REGION}-${SUFFIX}`.
+1.4 Create an empty Pulumi stack named `${ENV}-${REGION}-${SUFFIX}`.
 ```
 $ make init
 ```
-5. Switch the current workspace to the Pulumi stack `${ENV}-${REGION}-${SUFFIX}`.
+1.5 Switch the current workspace to the Pulumi stack `${ENV}-${REGION}-${SUFFIX}`.
 ```
 $ pulumi stack select ${ENV}-${REGION}-${SUFFIX}
 ```
 
-### Provisioning a New EKS Cluster
-Create the EKS cluster by running `pulumi up`.
+### 2. Provisioning a New EKS Cluster
+2.1 Create the EKS cluster by running `pulumi up`.
 ```
 $ pulumi up
 Updating (dev-ap-southeast-1-f01)
@@ -78,7 +78,7 @@ The update takes 15-20 minutes and will create the following resources on AWS:
 - Create an ASG across multiple AZs for each component `default, tidb`.
 - Create multiple ASGs for each component `pd, tikv` with one ASG per AZ.
 
-Once the update is complete, verify the cluster, node groups, and Pods are up and running:
+2.2 Once the update is complete, verify the cluster, node groups, and Pods are up and running:
 ```
 $ pulumi stack output kubeconfig > kubeconfig.yml && export KUBECONFIG=$PWD/kubeconfig.yml
 
@@ -154,12 +154,12 @@ kube-proxy-sqdv4           1/1     Running   0          3m21s   10.0.81.0      i
 kube-proxy-z6qht           1/1     Running   0          3m49s   10.0.150.46    ip-10-0-150-46.ec2.internal    <none>           <none>
 ```
 
-### Deploying Control Plane
-Set the Pulumi configuration variables for the control plane.
+### 3. Deploying Control Plane
+3.1 Set the Pulumi configuration variables for the control plane.
 ```
 $ pulumi config set control-plane-enabled true
 ```
-Deploy the control plane components by running `pulumi up`.
+3.2 Deploy the control plane components by running `pulumi up`.
 ```
 $ pulumi up
 Updating (dev-ap-southeast-1-f01)
@@ -189,7 +189,7 @@ The update takes ~1 minutes and will create the following resources on AWS:
 - An EBS CSI Driver and an EBS StorageClass.
 - TiDB Operator CRDs and an TiDB Operator.
 
-Confirm that the control plane components are running, run the following command.
+3.3 Confirm that the control plane components are running, run the following command.
 ```
 $ kubectl -n kube-system get po -o wide
 NAME                                                     READY   STATUS    RESTARTS   AGE     IP             NODE                           NOMINATED NODE   READINESS GATES
@@ -214,7 +214,7 @@ tidb-controller-manager-7cb7f9c956-j4g5q                 1/1     Running   0    
 tidb-scheduler-59d5fdf9bd-57rsf                          2/2     Running   0          43s     10.0.158.86    ip-10-0-154-70.ec2.internal    <none>           <none>
 ... other pods ...
 ```
-Verify the `gp3` EBS StorageClass is ready.
+3.4 Verify the `gp3` EBS StorageClass is ready.
 ```
 $ kubectl -n kube-system get sc
 NAME            PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
@@ -232,23 +232,24 @@ ReclaimPolicy:      Delete
 VolumeBindingMode:  WaitForFirstConsumer
 ```
 
-### Deploying Shared Storage TiDB Cluster
+### 4. Deploying Shared Storage TiDB Cluster
 Set the Pulumi configuration variables for the shared storage TiDB cluster.
-- (Optional) If you want to initialize the password when you start the tenant TiDB service for the first time, set the following variables. If you have already initialized the password, you do not need to repeat the initialization when you wake up the tenant TiDB service.
+
+4.1 (Optional) If you want to initialize the password when you start the tenant TiDB service for the first time, set the following variables. If you have already initialized the password, you do not need to repeat the initialization when you wake up the tenant TiDB service.
 ```
 $ export PASSWORD_TENANT_1="admin-1"
 $ export PASSWORD_TENANT_2="admin-2"
 $ pulumi config set --path 'serverless-keyspaces[0].rootPassword' "${PASSWORD_TENANT_1}"
 $ pulumi config set --path 'serverless-keyspaces[1].rootPassword' "${PASSWORD_TENANT_2}"
 ```
-- Enable the shared storage TiDB cluster.
+4.2 Enable the shared storage TiDB cluster.
 ```
 $ pulumi config set --path 'serverless-keyspaces[0].tidbReplicas' 1
 $ pulumi config set --path 'serverless-keyspaces[1].tidbReplicas' 1
 $ pulumi config set --path 'serverless-suspend' false
 $ pulumi config set serverless-enabled true
 ```
-Deploy the shared storage TiDB cluster by running `pulumi up`.
+4.3 Deploy the shared storage TiDB cluster by running `pulumi up`.
 ```
 $ pulumi up
 Updating (dev-ap-southeast-1-f01)
@@ -281,7 +282,7 @@ The update takes ~1 minutes and will create the following resources on AWS:
 - An TiDB cluster as GC workers.
 - Two tenant TiDB cluster.
 
-View the Namespace status.
+4.4 View the Namespace status.
 ```
 $ kubectl get ns
 NAME              STATUS   AGE
@@ -291,7 +292,7 @@ kube-public       Active   20m
 kube-system       Active   20m
 tidb-serverless   Active   48s
 ```
-View the Pod status in the tidb-serverless namespace.
+4.5 View the Pod status in the tidb-serverless namespace.
 ```
 $ kubectl -n tidb-serverless get po -o wide -l app.kubernetes.io/component=pd
 NAME                      READY   STATUS    RESTARTS   AGE   IP             NODE                           NOMINATED NODE   READINESS GATES
@@ -311,23 +312,24 @@ serverless-cluster-tenant-1-tidb-0   2/2     Running   0          2m3s   10.0.15
 serverless-cluster-tenant-2-tidb-0   2/2     Running   0          2m2s   10.0.20.77     ip-10-0-26-233.ec2.internal   <none>           <none>
 serverless-cluster-tidb-0            2/2     Running   0          21s    10.0.7.203     ip-10-0-2-145.ec2.internal    <none>           <none>
 ```
-Get tenant TiDB services in the tidb-serverless namespace.
+4.6 Get tenant TiDB services in the tidb-serverless namespace.
 ```
 $ kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep LoadBalancer
 serverless-cluster-tenant-1-tidb        LoadBalancer   172.20.175.51    k8s-tidbserv-serverle-2e56d1dxxx-892c265c2ab1exxx.elb.ap-southeast-1.amazonaws.com   4000:30429/TCP,10080:31032/TCP   2m26s
 serverless-cluster-tenant-2-tidb        LoadBalancer   172.20.213.180   k8s-tidbserv-serverle-5b6b01axxx-36495fe2ad75dxxx.elb.ap-southeast-1.amazonaws.com   4000:31325/TCP,10080:30186/TCP   2m26s
 ```
+### 5. Using `kubectl port-forward` or a bastion host to access the database
 You can select either `kubectl port-forward` or a bastion host from the following options to access the database.
 
-### (Optional) Using `kubectl port-forward` to access the database
+#### 5.1 (Optional) Using `kubectl port-forward` to access the database
 If you do not create a bastion host, you can use `kubectl port-forward` to access tenant TiDB service.
 
-Forward tenant TiDB port from the local host to the k8s cluster.
+5.1.1 Forward tenant TiDB port from the local host to the k8s cluster.
 ```
 $ kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-1-tidb 14001:4000 > pf14001.out &
 $ kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-2-tidb 14002:4000 > pf14002.out &
 ```
-Set environment variables for the tenant TiDB service.
+5.1.2 Set environment variables for the tenant TiDB service.
 ```
 $ export HOST_TENANT_1=127.0.0.1
 $ export HOST_TENANT_2=127.0.0.1
@@ -335,26 +337,26 @@ $ export HOST_TENANT_2=127.0.0.1
 $ export PORT_TENANT_1=14001
 $ export PORT_TENANT_2=14002
 ```
-Install the MySQL client on your local machine.
+5.1.3 Install the MySQL client on your local machine.
 
-### (Optional) Preparing a bastion host to access the database
+#### 5.2 (Optional) Preparing a bastion host to access the database
 If you do not use `kubectl port-forward`, you can create a bastion host to access tenant TiDB service.
 
 Allow the bastion host to access the Internet. Select the correct key pair so that you can log in to the host via SSH.
 
-Generate an OpenSSH keypair for use with your server - as per the AWS [Requirements](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#how-to-generate-your-own-key-and-import-it-to-aws).
+5.2.1 Generate an OpenSSH keypair for use with your server - as per the AWS [Requirements](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#how-to-generate-your-own-key-and-import-it-to-aws).
 ```
 $ ssh-keygen -t rsa -f rsa -m PEM
 ```
 This will output two files, `rsa` and `rsa.pub`, in the current directory. Be sure not to commit these files!
 
-We then need to configure our stack so that the public key is used by our EC2 instance, and the private key used
+5.2.2 We then need to configure our stack so that the public key is used by our EC2 instance, and the private key used
 for subsequent SCP and SSH steps that will configure our server after it is stood up.
 ```
 $ cat rsa.pub | pulumi config set bastion-public-key --
 $ pulumi config set bastion-enabled true
 ```
-From there, you can run `pulumi up` and all bastion resources will be provisioned and configured.
+5.2.3 From there, you can run `pulumi up` and all bastion resources will be provisioned and configured.
 ```
 $ pulumi up
 Updating (dev-ap-southeast-1-f01)
@@ -378,22 +380,22 @@ Duration: 1m3s
 ```
 The update takes ~1 minutes and will create a bastion host on AWS.
 
-You can ssh securely into your VPC.
+5.2.4 You can ssh securely into your VPC.
 ```
 $ ssh -i rsa ec2-user@$(pulumi stack output bastionHost)
 ```
-Install the MySQL client on the bastion host.
+5.2.5 Install the MySQL client on the bastion host.
 ```
 $ sudo yum install mysql -y
 ```
-Connect the client to the tenant TiDB cluster. If there is the tenant password, enter the password. Otherwise, press `Enter` directly.
+5.2.6 Connect the client to the tenant TiDB cluster. If there is the tenant password, enter the password. Otherwise, press `Enter` directly.
 ```
 $ mysql --comments -h ${tidb-nlb-dnsname} -P 4000 -u root -p
 Enter password:
 ```
 `${tidb-nlb-dnsname}` is the LoadBalancer domain name of the TiDB service. You can view the domain name in the EXTERNAL-IP field by executing `kubectl -n tidb-serverless get svc -l app.kubernetes.io/component=tidb | grep LoadBalancer` on local host.
 
-Set environment variables on the bastion host.
+5.2.7 Set environment variables on the bastion host.
 ```
 $ export HOST_TENANT_1=k8s-tidbserv-serverle-2e56d1dxxx-892c265c2ab1exxx.elb.ap-southeast-1.amazonaws.com
 $ export HOST_TENANT_2=k8s-tidbserv-serverle-5b6b01axxx-36495fe2ad75dxxx.elb.ap-southeast-1.amazonaws.com
@@ -402,10 +404,10 @@ $ export PORT_TENANT_1=4000
 $ export PORT_TENANT_2=4000
 ```
 
-### Accessing the database
+### 6. Accessing the database
 Make sure you have operated one of the two access options above.
 
-Access the tenant TiDB service and create a table in the test database.
+6.1 Access the tenant TiDB service and create a table in the test database.
 ```
 $ mysql --comments -h ${HOST_TENANT_1} -P ${PORT_TENANT_1} -u root -p
 Enter password: 
@@ -460,14 +462,14 @@ MySQL [test]> exit
 Bye
 ```
 
-### Suspending Shared Storage TiDB Cluster
-If you are connecting to the bastion host, exit it and return to the previous local directory `pulumi-tidb-serverless` .
+### 7. Suspending Shared Storage TiDB Cluster
+7.1 If you are connecting to the bastion host, exit it and return to the previous local directory `pulumi-tidb-serverless` .
 ```
 [ec2-user@ip-10-0-171-43 ~]$ exit
 logout
 Connection to 50.16.xx.xx closed.
 ```
-Set the Pulumi configuration variables to suspend the shared storage TiDB cluster.
+7.2 Set the Pulumi configuration variables to suspend the shared storage TiDB cluster.
 ```
 $ pulumi config set --path 'serverless-keyspaces[0].rootPassword' ""
 $ pulumi config set --path 'serverless-keyspaces[1].rootPassword' ""
@@ -475,7 +477,7 @@ $ pulumi config set --path 'serverless-keyspaces[0].tidbReplicas' 0
 $ pulumi config set --path 'serverless-keyspaces[1].tidbReplicas' 0
 $ pulumi config set --path 'serverless-suspend' true
 ```
-Suspend the shared storage TiDB cluster by running `pulumi up`.
+7.3 Suspend the shared storage TiDB cluster by running `pulumi up`.
 ```
 $ pulumi up
 Updating (dev-ap-southeast-1-f01)
@@ -505,19 +507,19 @@ Duration: 1m31s
 ```
 After the shared storage TiDB cluster is suspended, all component pods of the cluster are deleted.
 
-### Destroying Shared Storage TiDB Cluster
-If you still have running kubectl processes that are forwarding ports, end them.
+### 8. Destroying Shared Storage TiDB Cluster
+8.1 If you still have running kubectl processes that are forwarding ports, end them.
 ```
 $ pgrep -lfa kubectl
 10001 kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-1-tidb 14001:4000
 10002 kubectl port-forward -n tidb-serverless svc/serverless-cluster-tenant-2-tidb 14002:4000
 $ kill 10001 10002
 ```
-Set the Pulumi configuration variables to destroy the shared storage TiDB cluster.
+8.2 Set the Pulumi configuration variables to destroy the shared storage TiDB cluster.
 ```
 $ pulumi config set serverless-enabled false
 ```
-Destroy the shared storage TiDB cluster by running `pulumi up`.
+8.3 Destroy the shared storage TiDB cluster by running `pulumi up`.
 ```
 $ pulumi up
 Updating (dev-ap-southeast-1-f01)
@@ -538,13 +540,13 @@ Resources:
 Duration: 1m1s
 ```
 
-### Destroying Control Plane
-Set the Pulumi configuration variables to destroy the control plane resources.
+### 9. Destroying Control Plane
+9.1 Set the Pulumi configuration variables to destroy the control plane resources.
 ```
 $ pulumi config set bastion-enabled false
 $ pulumi config set control-plane-enabled false
 ```
-Destroy the control plane resources by running `pulumi up`.
+9.2 Destroy the control plane resources by running `pulumi up`.
 ```
 $ pulumi up
 Updating (dev-ap-southeast-1-f01)
@@ -573,8 +575,8 @@ Resources:
 Duration: 2m36s
 ```
 
-### Tidying up EKS Cluster
-Destroy all of its infrastructure with `pulumi destroy`.
+### 10. Tidying up EKS Cluster
+10.1 Destroy all of its infrastructure with `pulumi destroy`.
 ```
 $ pulumi destroy
 Destroying (dev-ap-southeast-1-f01)
@@ -602,7 +604,8 @@ Resources:
 Duration: 9m18s
 ```
 The resources in the stack have been deleted, but the history and configuration associated with the stack are still maintained.
-If you want to remove the stack completely, run `make clean` or `pulumi stack rm ${ENV}-${REGION}-${SUFFIX}`.
+
+10.2 If you want to remove the stack completely, run `make clean` or `pulumi stack rm ${ENV}-${REGION}-${SUFFIX}`.
 ```
 make clean
 ```
