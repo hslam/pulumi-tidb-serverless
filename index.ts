@@ -130,7 +130,7 @@ for (const options of asg.loadNodeGroupOptionsList()) {
                     const availabilityZone = subnet.availabilityZone;
                     let subnetIds: pulumi.Input<string>[] = [subnetId];
                     // Create a managed node group in a specific AZ.
-                    const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${availabilityZone}-${asg.nodeGroupName(options)}`, {
+                    const nodeGroup = asg.createManagedNodeGroup(`${prefix}-${availabilityZone.slice(-1)}-${asg.nodeGroupName(options)}`, {
                         options: options,
                         env: env,
                         prefix: prefix,
