@@ -55,7 +55,7 @@ export function loadNodeGroupOptionsList(): NodeGroupOptions[] {
 export function availabilityZoneSizeList(size: number, numberOfAvailabilityZones: number): number[] {
     var azSizeList: number[] = new Array(numberOfAvailabilityZones)
     for (let i = 0; i < azSizeList.length; i++) {
-        azSizeList[i] = size / numberOfAvailabilityZones
+        azSizeList[i] = Math.floor(size / numberOfAvailabilityZones)
     }
     if (size % numberOfAvailabilityZones > 0) {
         for (let i = 0; i < size % numberOfAvailabilityZones; i++) {
