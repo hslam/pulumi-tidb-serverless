@@ -19,8 +19,8 @@ config:
       exclusive: false
       instanceTypes: ["t2.medium"]
       max: 10
-      min: 3
-      multipleASGs: false
+      desired: 3
+      min: 1
       tier: "standard"
       version: 0
     - capacityType: "ON_DEMAND"
@@ -29,7 +29,7 @@ config:
       instanceTypes: ["t2.medium"]
       max: 6
       min: 3
-      multipleASGs: true
+      numberASGs: 3
       tier: "standard"
       version: 0
     - capacityType: "ON_DEMAND"
@@ -38,8 +38,20 @@ config:
       instanceTypes: ["t2.medium"]
       max: 9
       min: 3
-      multipleASGs: true
+      numberASGs: 3
       tier: "standard"
+      version: 0
+    - capacityType: "ON_DEMAND"
+      category: "storage"
+      component: "tikv"
+      instanceTypes: ["t2.medium"]
+      max: 1
+      desired: 0
+      min: 0
+      numberASGs: 1
+      startAZ: 0
+      allowEmptyGroup: false
+      tier: "hot"
       version: 0
     - capacityType: "SPOT"
       category: "compute"
@@ -47,7 +59,6 @@ config:
       instanceTypes: ["t2.medium"]
       max: 10
       min: 2
-      multipleASGs: false
       tier: "standard"
       version: 0
   pulumi-tidb-serverless:serverless-enabled: "false"
@@ -67,6 +78,7 @@ config:
   pulumi-tidb-serverless:serverless-suspend: "false"
   pulumi-tidb-serverless:serverless-tidb-replicas: "1"
   pulumi-tidb-serverless:serverless-tidb-version: v7.1.0
+  pulumi-tidb-serverless:serverless-tikv-hot-replicas: "0"
   pulumi-tidb-serverless:serverless-tikv-replicas: "3"
   pulumi-tidb-serverless:serverless-tikv-storage-size: "10Gi"
   pulumi-tidb-serverless:serverless-tikv-version: v7.1.0

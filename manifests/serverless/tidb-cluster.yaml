@@ -37,6 +37,8 @@ spec:
     maxFailoverCount: 3
     replicas: 0
     requests:
+      cpu: 1000m
+      memory: 2Gi
       storage: "10Gi"
     storageClassName: ebs-sc
     config: |
@@ -60,17 +62,26 @@ spec:
             topologyKey: kubernetes.io/hostname
     nodeSelector:
       serverless: tikv
+      tier: standard
     tolerations:
       - effect: NoSchedule
         key: serverless
         operator: Equal
         value: tikv
+      - effect: NoSchedule
+        key: tier
+        operator: Equal
+        value: standard
+    storeLabels:
+      - "tier"
     baseImage: pingcap/tikv
     version: v7.1.0
     maxFailoverCount: 3
     evictLeaderTimeout: 1m
     replicas: 0
     requests:
+      cpu: 1000m
+      memory: 2Gi
       storage: "10Gi"
     storageClassName: ebs-sc
     config: |
@@ -99,10 +110,10 @@ spec:
     replicas: 0
     requests:
       cpu: 1000m
-      memory: 512Mi
+      memory: 1Gi
     limits:
       cpu: 2000m
-      memory: 1Gi
+      memory: 2Gi
     service:
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-type: nlb

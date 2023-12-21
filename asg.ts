@@ -15,10 +15,13 @@ export interface NodeGroupOptions {
     instanceTypes: string [];
     capacityType: string;
     min: number;
+    desired: number;
     max: number;
     maxUnavailable: number;
     exclusive: boolean;
-    multipleASGs: boolean;
+    numberASGs: number;
+    startAZ: number;
+    allowEmptyGroup: boolean;
 }
 
 const defaultNodeGroupOptions: NodeGroupOptions = {
@@ -29,10 +32,13 @@ const defaultNodeGroupOptions: NodeGroupOptions = {
     instanceTypes: ["t2.medium"],
     capacityType: "ON_DEMAND",
     min: 0,
+    desired: 0,
     max: 100,
     maxUnavailable: 1,
     exclusive: true,
-    multipleASGs: false,
+    numberASGs: 0,
+    startAZ: 0,
+    allowEmptyGroup: false,
 };
 
 export function nodeGroupName(options: NodeGroupOptions): string {
@@ -86,7 +92,7 @@ export function createManagedNodeGroup(
         capacityType: args.options.capacityType,
         scalingConfig: {
             maxSize: args.options.max,
-            desiredSize: args.options.min,
+            desiredSize: args.options.desired,
             minSize: args.options.min,
         },
         instanceTypes: args.options.instanceTypes,
@@ -102,6 +108,7 @@ export function createManagedNodeGroup(
         },
         labels: {
             ["serverless"]: args.options.component,
+            ["tier"]: args.options.tier,
         },
     };
     if (args.options.exclusive) {

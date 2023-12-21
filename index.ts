@@ -111,19 +111,28 @@ export const kubeconfig = cluster.kubeconfig;
 
 const nodeGroups: eks.ManagedNodeGroup[] = [];
 for (const options of asg.loadNodeGroupOptionsList()) {
-    if (options.min <= 0) {
+    if (options.min <= 0 && options.desired <= 0 && !options.allowEmptyGroup) {
         continue
     }
-    if (options.multipleASGs) {
+    if (options.desired < options.min) {
+        options.desired = options.min
+    }
+    if (options.desired > options.max) {
+        options.desired = options.max
+    }
+    if (options.numberASGs > 0) {
         privateSubnetIds.apply((privateSubnetIds) => {
-            const azMinSizeList = asg.availabilityZoneSizeList(options.min, numberOfAvailabilityZones)
-            const azMaxSizeList = asg.availabilityZoneSizeList(options.max, numberOfAvailabilityZones)
-            for (let i = 0; i < privateSubnetIds.length; i++) {
+            const azMinSizeList = asg.availabilityZoneSizeList(options.min, options.numberASGs)
+            const azDesiredSizeList = asg.availabilityZoneSizeList(options.desired, options.numberASGs)
+            const azMaxSizeList = asg.availabilityZoneSizeList(options.max, options.numberASGs)
+            for (let i = options.startAZ; i < options.startAZ + options.numberASGs; i++) {
                 const minSize = azMinSizeList[i]
-                if (minSize <= 0) {
+                const desiredSize = azDesiredSizeList[i]
+                if (minSize <= 0 && desiredSize <= 0 && !options.allowEmptyGroup) {
                     continue
                 }
                 options.min = minSize
+                options.desired = desiredSize
                 options.max = azMaxSizeList[i]
                 const subnetId = privateSubnetIds[i]
                 aws.ec2.getSubnet({id: subnetId}).then((subnet) => {

@@ -14,6 +14,7 @@ const pdReplicas = config.getNumber("serverless-pd-replicas") || 1;
 const pdVersion = config.get<string>("serverless-pd-version") || "v7.1.0";
 const pdStorageSize = config.get<string>("serverless-pd-storage-size") || "10Gi";
 const tikvReplicas = config.getNumber("serverless-tikv-replicas") || 1;
+const tikvHotReplicas = config.getNumber("serverless-tikv-hot-replicas") || 0;
 const tikvVersion = config.get<string>("serverless-tikv-version") || "v7.1.0";
 const tikvStorageSize = config.get<string>("serverless-tikv-storage-size") || "10Gi";
 const tidbReplicas = config.getNumber("serverless-tidb-replicas") || 1;
@@ -77,6 +78,10 @@ export function InstallServerless(provider: k8s.Provider, prefix: string, ...dep
 
     // Create shared TiKV cluster.
     const sharedTC = CreateSharedTC(provider, prefix, nsName, "serverless-cluster", pdReplicas, tidbReplicas, tikvReplicas, keyspaces, ns, ...dependencies);
+    if (tikvHotReplicas > 0) {
+        const hotTCName = `serverless-cluster-hot`
+        CreateTiKVTCWithTier(provider, prefix, nsName, hotTCName, "serverless-cluster", nsName, "hot", tikvHotReplicas, ns, sharedTC, ...dependencies);
+    }
     for (const keyspace of keyspaces) {
         if (keyspace.name.length > 0 && keyspace.tidbReplicas > 0) {
             // Create tenant TiDB cluster.
@@ -150,7 +155,21 @@ function CreateSharedTC(
     keyspaces: Keyspace[],
     ...dependencies: pulumi.Input<pulumi.Resource>[]
 ) {
-    return CreateTC(provider, prefix, nsName, name, "", "", pdReplicas, tidbReplicas, tikvReplicas, keyspaces, defaultKeyspace, ...dependencies);
+    return CreateTC(provider, prefix, ns, name, "", "", pdReplicas, tidbReplicas, tikvReplicas, keyspaces, defaultKeyspace, "standard", ...dependencies);
+}
+
+function CreateTiKVTCWithTier(
+    provider: k8s.Provider,
+    prefix: string,
+    ns: string,
+    name: string,
+    externalName: string,
+    externalNamespace: string,
+    tier: string,
+    tikvReplicas: number,
+    ...dependencies: pulumi.Input<pulumi.Resource>[]
+) {
+    return CreateTC(provider, prefix, ns, name, externalName, externalNamespace, 0, 0, tikvReplicas, [], defaultKeyspace, tier, ...dependencies);
 }
 
 function CreateTenantTiDBTC(
@@ -163,7 +182,7 @@ function CreateTenantTiDBTC(
     keyspace: Keyspace,
     ...dependencies: pulumi.Input<pulumi.Resource>[]
 ) {
-    return CreateTC(provider, prefix, nsName, name, externalName, externalNamespace, 0, keyspace.tidbReplicas, 0, [], keyspace, ...dependencies);
+    return CreateTC(provider, prefix, ns, name, externalName, externalNamespace, 0, keyspace.tidbReplicas, 0, [], keyspace, "", ...dependencies);
 }
 
 function CreateTC(
@@ -178,6 +197,7 @@ function CreateTC(
     tikvReplicas: number,
     keyspaces: Keyspace[],
     keyspace: Keyspace,
+    tier: string,
     ...dependencies: pulumi.Input<pulumi.Resource>[]
 ) {
     const keyspaceNames: string[] = [];
@@ -207,6 +227,7 @@ function CreateTC(
                 withTiDBClusterReplicas("pd", pdReplicas),
                 withTiDBClusterReplicas("tidb", tidbReplicas),
                 withTiDBClusterReplicas("tikv", tikvReplicas),
+                withTiKVTier(tier),
                 withTiDBClusterConfigItem("pd", "{{PreAllocKeyspaces}}", preAllocKeyspaces),
                 withTiDBClusterKeyspace("tidb", keyspace),
             ],
@@ -252,6 +273,16 @@ export function withExternalCluster(name: string, ns: string) {
 export function withSuspend(suspend: boolean) {
     return (obj: any, _opts: pulumi.CustomResourceOptions) => {
         obj.spec.suspendAction.suspendStatefulSet = suspend;
+    };
+}
+
+function withTiKVTier(tier: string) {
+    return (obj: any, _opts: pulumi.CustomResourceOptions) => {
+        assertGVK(obj, "pingcap.com/v1alpha1", "TidbCluster");
+        if (obj.spec.tikv != null && tier.length > 0) {
+            obj.spec.tikv.nodeSelector["tier"] = tier;
+            obj.spec.tikv.tolerations[1].value = tier;
+        }
     };
 }
 
