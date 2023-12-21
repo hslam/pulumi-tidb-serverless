@@ -12,6 +12,7 @@ import * as autoscaler from "./autoscaler";
 import * as loadbalancer from "./loadbalancer";
 import * as serverless from "./serverless";
 import * as bastion from "./bastion";
+import * as metrics from "./metrics";
 
 const config = new pulumi.Config();
 
@@ -168,6 +169,8 @@ for (const options of asg.loadNodeGroupOptionsList()) {
 
 const dependencies: pulumi.Input<pulumi.Resource>[] = [...nodeGroups];
 if (controlPlaneEnabled) {
+    const metricsServer = metrics.InstallMetricsServer(cluster, ...nodeGroups);
+    dependencies.push(metricsServer);
     vpcId.apply((vpcId) => {
         const lbc = loadbalancer.InstallLoadBalancer(cluster, env, prefix, region, vpcId);
         dependencies.push(lbc);

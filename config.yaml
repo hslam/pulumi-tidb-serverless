@@ -12,6 +12,7 @@ config:
   pulumi-tidb-serverless:cluster-region: ap-southeast-1
   pulumi-tidb-serverless:cluster-suffix: f01
   pulumi-tidb-serverless:control-plane-enabled: "false"
+  pulumi-tidb-serverless:metrics-server-chart-version: "3.11.0"
   pulumi-tidb-serverless:nodegroups:
     - capacityType: "SPOT"
       category: "control-plane"
