@@ -6,6 +6,9 @@ import * as eks from "@pulumi/eks";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
+const config = new pulumi.Config();
+const loadBalancerVersion = config.require("aws-load-balancer-controller");
+
 export function InstallLoadBalancer(c: eks.Cluster, env: string, cluster: string, region: string, vpcId: string, ...dependencies: pulumi.Input<pulumi.Resource>[]) {
     const albIamPolicy = new aws.iam.Policy(`aws-load-balancer-controller`, {
         policy: {
@@ -285,7 +288,7 @@ export function InstallLoadBalancer(c: eks.Cluster, env: string, cluster: string
             repositoryOpts: {
                 repo: "https://aws.github.io/eks-charts",
             },
-            version: "1.5.4",
+            version: loadBalancerVersion,
             namespace: "kube-system",
             values: {
                 clusterName: c.eksCluster.name,

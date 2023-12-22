@@ -6,6 +6,9 @@ import * as eks from "@pulumi/eks";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 
+const config = new pulumi.Config();
+const csiDriverVersion = config.require("aws-ebs-csi-driver-version");
+
 export function InstallCSIDriver(c: eks.Cluster, env: string, cluster: string, ...dependencies: pulumi.Input<pulumi.Resource>[]) {
     const ebsCSIControllerSaName = "ebs-csi-controller-sa";
 
@@ -159,7 +162,7 @@ export function InstallCSIDriver(c: eks.Cluster, env: string, cluster: string, .
             chart: "aws-ebs-csi-driver",
             fetchOpts: {
                 repo: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver",
-                version: "2.19.0",
+                version: csiDriverVersion,
             },
             namespace: "kube-system",
             values: {
