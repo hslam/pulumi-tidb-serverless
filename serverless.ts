@@ -55,7 +55,7 @@ export function InstallTiDBOperator(provider: k8s.Provider, ...dependencies: pul
             version: `${tidbOperatorTag}`,
             values: {
                 scheduler: {
-                    kubeSchedulerImageName: "registry.k8s.io/kube-scheduler",
+                    create: false,
                 }
             }
         },

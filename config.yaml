@@ -1,16 +1,16 @@
 config:
   aws:region: ap-southeast-1
-  pulumi-tidb-serverless:aws-ebs-csi-driver-version: "2.19.0"
-  pulumi-tidb-serverless:aws-load-balancer-controller: "1.5.4"
-  pulumi-tidb-serverless:bastion-ami-id: "ami-0bdd2fa5f37cf0248"
+  pulumi-tidb-serverless:aws-ebs-csi-driver-version: "2.26.0"
+  pulumi-tidb-serverless:aws-load-balancer-controller: "1.6.1"
+  pulumi-tidb-serverless:bastion-ami-id: "ami-04f55d4f1b2e3ab55"
   pulumi-tidb-serverless:bastion-enabled: "false"
   pulumi-tidb-serverless:bastion-instance-type: "t2.medium"
-  pulumi-tidb-serverless:cluster-autoscaler-ca-version: "v1.26.2"
+  pulumi-tidb-serverless:cluster-autoscaler-ca-version: "v1.28.2"
   pulumi-tidb-serverless:cluster-autoscaler-down-threshold: "0.5"
   pulumi-tidb-serverless:cluster-availability-zones: "3"
   pulumi-tidb-serverless:cluster-cidr-block: 10.0.0.0/16
   pulumi-tidb-serverless:cluster-env: dev
-  pulumi-tidb-serverless:cluster-k8s-version: "1.26"
+  pulumi-tidb-serverless:cluster-k8s-version: "1.28"
   pulumi-tidb-serverless:cluster-region: ap-southeast-1
   pulumi-tidb-serverless:cluster-suffix: f01
   pulumi-tidb-serverless:control-plane-enabled: "false"
@@ -77,12 +77,12 @@ config:
   pulumi-tidb-serverless:serverless-namespace: tidb-serverless
   pulumi-tidb-serverless:serverless-pd-replicas: "3"
   pulumi-tidb-serverless:serverless-pd-storage-size: "10Gi"
-  pulumi-tidb-serverless:serverless-pd-version: v7.1.0
+  pulumi-tidb-serverless:serverless-pd-version: v7.5.0
   pulumi-tidb-serverless:serverless-suspend: "false"
   pulumi-tidb-serverless:serverless-tidb-replicas: "1"
-  pulumi-tidb-serverless:serverless-tidb-version: v7.1.0
+  pulumi-tidb-serverless:serverless-tidb-version: v7.5.0
   pulumi-tidb-serverless:serverless-tikv-hot-replicas: "0"
   pulumi-tidb-serverless:serverless-tikv-replicas: "3"
   pulumi-tidb-serverless:serverless-tikv-storage-size: "10Gi"
-  pulumi-tidb-serverless:serverless-tikv-version: v7.1.0
-  pulumi-tidb-serverless:tidb-operator-tag: v1.4.4
+  pulumi-tidb-serverless:serverless-tikv-version: v7.5.0
+  pulumi-tidb-serverless:tidb-operator-tag: v1.5.1
